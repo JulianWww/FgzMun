@@ -45,6 +45,27 @@ export const DELEGATES_CAN_AMEND_NOTICE = (
   </Message>
 );
 
+
+function DeleteResolutionModal(props: { onConfirm: () => void }) {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  return (<>
+      <Dropdown.Item negative fluid basic
+          onClick={() => setIsModalOpen(true)}
+      >
+        <Icon name="delete" /> Delete resolution?
+      </Dropdown.Item>
+      <Confirm
+        open={isModalOpen}
+        header='Delete resolution?'
+        content='Are you sure? This is irreversible and will delete all
+                  posts, text, amendments and voting history. You might want to close the resolution (top right dropdown) instead?'
+        onCancel={() => setIsModalOpen(false)}
+        onConfirm={() => { setIsModalOpen(false); props.onConfirm() }}
+      />
+    </>)
+}
+
 interface Props extends RouteComponentProps<URLParameters> {
 }
 
@@ -683,6 +704,7 @@ export default class Resolution extends React.Component<Props, State> {
               onChange={checkboxHandler<ResolutionData>(resolutionFref, 'amendmentsArePublic')}
             />
           </Form>
+          {this.renderAdditionalOptions()}
         </Segment>
         {amendmentsArePublic(resolution) && DELEGATES_CAN_AMEND_NOTICE}
       </React.Fragment>
@@ -741,6 +763,18 @@ export default class Resolution extends React.Component<Props, State> {
     return Object.keys(amendments).reverse().map(key => {
       return renderAmendment(key, amendments[key], resolutionRef.child('amendments').child(key));
     });
+  }
+
+  renderAdditionalOptions = () => {
+    return  (
+      <Dropdown
+        text='More options'
+        className='icon'
+      >
+      <Dropdown.Menu>
+        <DeleteResolutionModal onConfirm={() => this.recoverResolutionFref().remove()} />
+      </Dropdown.Menu>
+    </Dropdown>)
   }
 
   renderAmendmentsGroup = (resolution?: ResolutionData) => {
