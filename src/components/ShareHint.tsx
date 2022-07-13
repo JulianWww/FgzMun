@@ -3,7 +3,7 @@ import { CommitteeID } from './Committee';
 import { Divider, Header, Input, List, Segment } from 'semantic-ui-react';
 import { StrawpollID } from './Strawpoll';
 
-function CopyableText(props: {
+export function CopyableText(props: {
   value: string
 }) {
   const [message, setMessage] = React.useState<string>('Copy');
@@ -40,18 +40,20 @@ function CopyableText(props: {
 export function CommitteeShareHint(props: {
   committeeID: CommitteeID;
 }) {
-  const hostname = window.location.hostname;
+  //const hostname = window.location.hostname;
   const { committeeID } = props;
-  const url = `${hostname}/committees/${committeeID}`;
+  const url = `${committeeID}`;//${hostname}/committees/
 
   return (
     <Segment>
-      <Header size='medium'>Here's the shareable link to your committee</Header>
-      <CopyableText value={url} />
+      <Header size='medium'>Here's the ID of your committee:</Header>
+      <Header as="h1" textAlign="center">
+        {url}
+      </Header>
 
       <Divider hidden />
 
-      Copy and send this to your delegates, and they will be able to:
+      Share and send this to your delegates, and they will be able to:
 
       <VerboseShareCapabilities />
       
@@ -89,13 +91,14 @@ export function StrawpollShareHint(props: {
   committeeID: CommitteeID;
   strawpollID: StrawpollID;
 }) {
-  const hostname = window.location.hostname;
   const { committeeID, strawpollID } = props;
-  const url = `${hostname}/committees/${committeeID}/strawpolls/${strawpollID}`;
+  const url = `${committeeID}:${strawpollID}`;
   return (
     <Segment>
-      <Header size='small'>Here's the shareable link to your strawpoll</Header>
-      <CopyableText value={url} />
+      <Header size='small'>Here's the key to the strawpoll</Header>
+      <Header as="h1" textAlign="center">
+        {url} 
+      </Header>
     </Segment>
   );
 }
@@ -105,9 +108,8 @@ export function MotionsShareHint(props: {
   canPropose: boolean,
   committeeID: CommitteeID;
 }) {
-  const hostname = window.location.hostname;
-  const { committeeID, canVote, canPropose } = props;
-  const url = `${hostname}/committees/${committeeID}/motions`;
+  //const hostname = window.location.hostname;
+  const { canVote, canPropose } = props;
 
   let action: string
 
@@ -123,8 +125,7 @@ export function MotionsShareHint(props: {
 
   return (
     <Segment>
-      <Header size='small'>Here's the shareable link to {action}</Header>
-      <CopyableText value={url} />
+      <Header size='small'>Delegates please got to the "Motions" tab to {action}</Header>
     </Segment>
   );
 }

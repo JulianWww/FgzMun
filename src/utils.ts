@@ -101,3 +101,12 @@ export function shortMeetId() {
     return randomCharacter();
   });
 }
+
+export function getID(data: Record<string, MemberData>, key: string){
+  for (let element of Object.keys(data)){
+    if (data[element].name === key){
+      return element;
+    }
+  }
+  return "";
+}

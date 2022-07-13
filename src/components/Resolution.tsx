@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { MemberID, nameToMemberOption, MemberData, Rank } from './Member';
 import { AmendmentID, AmendmentData, DEFAULT_AMENDMENT, AMENDMENT_STATUS_OPTIONS, recoverLinkedCaucus } from './Amendment';
 import {
-  Card, Button, Form, Dropdown, Segment, Input, TextArea, Confirm,
+  Card, Button, Form, Dropdown, Segment, Input, TextArea,
   List, SemanticICONS, Icon, Tab, Grid, SemanticCOLORS, Container, Message, Label, Popup, Statistic, DropdownItemProps, TabProps
 } from 'semantic-ui-react';
 import { Helmet } from 'react-helmet';
@@ -23,6 +23,9 @@ import { putCaucus } from '../actions/caucus-actions';
 import { Stance } from './caucus/SpeakerFeed';
 import { NotFound } from './NotFound';
 import Files from './Files';
+import { getCookie } from "../cookie"
+import { getID } from "../utils";
+
 
 const TAB_ORDER = ['feed', 'text', 'amendments', 'voting'];
 
@@ -51,7 +54,6 @@ interface State {
   authUnsubscribe?: () => void;
   user?: firebase.User | null;
   loading: boolean;
-  askToDeleteResolution: boolean
 }
 
 export enum ResolutionStatus {
@@ -78,13 +80,13 @@ const MAJORITY_OPTIONS: DropdownItemProps[] = [
   { key: Majority.TwoThirdsNoAbstentions, value: Majority.TwoThirdsNoAbstentions, text: "Two-thirds majority required, ignoring abstentions" },
 ]
 
-function getThreshold(requiredMajority: Majority, committee: CommitteeData | undefined, fors: number, againsts: number): number {
+function getThreshold(requiredMajority: Majority, committee: CommitteeData | undefined, fors: number, againsts: number, remaining: number): number {
   const stats = makeCommitteeStats(committee)
   switch (requiredMajority) {
     case Majority.TwoThirds:
       return stats.twoThirdsMajority;
     case Majority.TwoThirdsNoAbstentions:
-      return Math.ceil((2/3) * (fors + againsts));
+      return Math.ceil((2/3) * (fors + againsts + remaining) + 0.1);
     case Majority.Simple:
     default:
       return stats.simpleMajority;
@@ -144,8 +146,7 @@ export default class Resolution extends React.Component<Props, State> {
 
     this.state = {
       committeeFref: firebase.database().ref('committees').child(match.params.committeeID),
-      loading: true,
-      askToDeleteResolution: false
+      loading: true
     };
   }
 
@@ -342,32 +343,12 @@ export default class Resolution extends React.Component<Props, State> {
     );
   }
 
-  cycleVote = (memberID: MemberID, member: MemberData, currentVote?: Vote) => {
+  setVote = (memberID: MemberID, member: MemberData, newVote: Vote) => {
     const { resolutionID, committeeID } = this.props.match.params;
-
-    // leave this be in the case of undefined and Against
-    let newVote = undefined;
-
-    if (currentVote === undefined) {
-      newVote = Vote.For;
-    } else if (currentVote === Vote.For) {
-      if (member.voting) {
-        newVote = Vote.Against;
-      } else {
-        newVote = Vote.Abstaining;
-      }
-    } else if (currentVote === Vote.Abstaining) {
-      newVote = Vote.Against;
-    } else if (currentVote === Vote.Against) {
-      // delete the vote
-    }
-
     voteOnResolution(committeeID, resolutionID, memberID, newVote);
   }
 
   renderVotingMember = (key: MemberID, member: MemberData, vote?: Vote) => {
-    const { cycleVote } = this;
-
     let color: 'green' | 'yellow' | 'red' | undefined;
     let icon: SemanticICONS = 'question';
 
@@ -387,7 +368,8 @@ export default class Resolution extends React.Component<Props, State> {
         floated="left"
         color={color}
         icon
-        onClick={() => cycleVote(key, member, vote)}
+        //onClick={() => cycleVote(key, member, vote)}
+        //disabled
       >
         <Icon
           name={icon}
@@ -432,18 +414,33 @@ export default class Resolution extends React.Component<Props, State> {
     return <CommitteeStats verbose={false} data={committee} />;
   }
 
-  renderCount = (key: string, color: SemanticCOLORS, icon: SemanticICONS, count: number) => {
+  renderCount = (key: string, color: SemanticCOLORS, icon: SemanticICONS, count: number, vote: Vote) => {
+    const { setVote } = this;
+    const { committee } = this.state;
+    const members = (committee ? committee.members : undefined) || {};
+    const nationData = this.getNation();
+    var nationName = "";
+    if (nationData)
+    {
+      nationName = nationData.name;
+    }
+    const id = getID(members, nationName);
+
+
     const trigger = (
       <Button
         key={'count' + key}
         color={color}
         icon
         fluid
+        onClick={() => setVote(id, members[id], vote)}
       >
         {key.toUpperCase()}: {count}
       </Button>
     );
-
+      /*<Popup trigger={trigger}>
+          {this.renderStats()}
+        </Popup>*/
     return (
       <Grid.Column key={key}>
         {/* <Button
@@ -456,7 +453,10 @@ export default class Resolution extends React.Component<Props, State> {
             color={color === 'yellow' ? 'black' : undefined}
           />
         </Button> */}
-        <Popup trigger={trigger}>
+        <Popup 
+          trigger={trigger}
+          hoverable={true}
+        >
           {this.renderStats()}
         </Popup>
       </Grid.Column>
@@ -515,7 +515,7 @@ export default class Resolution extends React.Component<Props, State> {
       ? (resolution.requiredMajority || DEFAULT_RESOLUTION.requiredMajority as Majority)
       : DEFAULT_RESOLUTION.requiredMajority as Majority;
 
-    const threshold = getThreshold(requiredMajority, committee, fors, againsts);
+    const threshold = getThreshold(requiredMajority, committee, fors, againsts, remaining);
     const thresholdName = getThresholdName(requiredMajority);
 
     const resolutionPassed: boolean = fors >= threshold && !resolutionVetoed; 
@@ -541,9 +541,9 @@ export default class Resolution extends React.Component<Props, State> {
           {columns}
         </Grid>
         <Grid columns="equal">
-          {renderCount('yes', 'green', 'plus', fors)}
-          {renderCount('no', 'red', 'remove', againsts)}
-          {renderCount('abstaining', 'yellow', 'minus', abstains)}
+          {renderCount('yes', 'green', 'plus', fors, Vote.For)}
+          {renderCount('no', 'red', 'remove', againsts, Vote.Against)}
+          {renderCount('abstaining', 'yellow', 'minus', abstains, Vote.Abstaining)}
         </Grid>
         {resolutionPassed && <Statistic inverted>
           <Statistic.Value>Passed</Statistic.Value>
@@ -567,6 +567,24 @@ export default class Resolution extends React.Component<Props, State> {
     );
   }
 
+  getNation() {
+    if (this.state.committee)
+    {
+      const nation = getCookie("nation");
+      if (nation)
+      {
+        const authToken = getCookie("authToken");
+        const members = this.state.committee.members || {};
+        const id = getID(members, nation);
+        if (authToken === members[id].authToken)
+        {
+          return members[id];
+        }
+      }
+    }
+    return null;
+  }
+
   renderMeta = (resolution?: ResolutionData) => {
     const resolutionFref = this.recoverResolutionFref();
     const { handleProvisionResolution, amendmentsArePublic } = this;
@@ -574,6 +592,8 @@ export default class Resolution extends React.Component<Props, State> {
     const memberOptions = recoverMemberOptions(this.state.committee);
 
     // TFW no null coalescing operator 
+    const cookieNation = this.getNation();
+
     const proposer = resolution
       ? resolution.proposer
       : undefined;
@@ -582,7 +602,7 @@ export default class Resolution extends React.Component<Props, State> {
       ? resolution.seconder
       : undefined;
 
-    const hasIdenticalProposerSeconder = proposer && seconder ? proposer === seconder : false;
+    const hasIdenticalProposerSeconder = cookieNation && seconder ? cookieNation.name === seconder : false;
 
     const proposerTree = (
       <Form.Dropdown
@@ -593,13 +613,21 @@ export default class Resolution extends React.Component<Props, State> {
         loading={!resolution}
         search
         selection
+        disabled
         fluid
         onChange={memberDropdownHandler<ResolutionData>(resolutionFref, 'proposer', memberOptions)}
         options={memberOptions}
         label="Proposer"
       />
     );
-
+    if (cookieNation) 
+    {
+      if (memberOptions && proposer === undefined) {
+        resolutionFref.child("proposer").set(memberOptions.filter(c => c.key === nameToMemberOption(cookieNation.name).key)[0].text);
+      }
+    }
+    let cookieNationName = "";
+    if (cookieNation){cookieNationName = cookieNation.name}
     const seconderTree = (
       <Form.Dropdown
         key="seconder"
@@ -610,6 +638,7 @@ export default class Resolution extends React.Component<Props, State> {
         search
         selection
         fluid
+        disabled={(proposer) ? !(cookieNationName === nameToMemberOption(proposer).text): false}
         onChange={memberDropdownHandler<ResolutionData>(resolutionFref, 'seconder', memberOptions)}
         options={memberOptions}
         label="Seconder"
@@ -775,26 +804,6 @@ export default class Resolution extends React.Component<Props, State> {
     }
   }
 
-  deleteResolution = () => {
-    return (<div>
-        <Button negative fluid basic
-            onClick={() => {this.setState({ askToDeleteResolution: true })}}
-        >
-          <Icon name="delete" /> Delete resolution?
-        </Button>
-        <Confirm
-          open={this.state.askToDeleteResolution}
-          header='Delete resolution?'
-          content='Are you sure? This is irreversible and will delete all
-                   posts, text, amendments and voting history. You may be
-                   looking to close the resolution (top right dropdown).'
-          onCancel={() => {this.setState({ askToDeleteResolution: false })}}
-          onConfirm={() => {this.setState({ askToDeleteResolution: false });
-                            this.recoverResolutionFref().remove()}}
-        />
-      </div>)
-  }
-
   renderResolution = (resolution?: ResolutionData) => {
     const { renderAmendmentsGroup, renderVoting, renderFeed, renderText } = this;
     const { tab } = this.props.match.params;
@@ -837,7 +846,6 @@ export default class Resolution extends React.Component<Props, State> {
             </Grid.Column>
             <Grid.Column width={5}>
               {this.renderMeta(resolution)}
-              {this.deleteResolution()}
             </Grid.Column>
           </Grid.Row>
         </Grid >

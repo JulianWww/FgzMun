@@ -12,6 +12,9 @@ import { MemberOption, COUNTRY_OPTIONS } from '../constants';
 import { ResolutionID } from './Resolution';
 import { putAmendment } from '../actions/resolution-actions';
 import { DEFAULT_AMENDMENT } from './Amendment';
+import { getCookie } from "../cookie"
+import { nameToMemberOption } from "./Member"
+import { getID } from "../utils"
 
 const TEXT_ICON: SemanticICONS = 'align left';
 const FILE_ICON: SemanticICONS = 'file outline';
@@ -382,6 +385,33 @@ export default class Files extends React.Component<Props, State> {
     this.setState({ uploader: memberOptions.filter(c => c.value === data.value)[0] });
   }
 
+  getNation() {
+    if (this.state.committee)
+    {
+      const nation = getCookie("nation");
+      if (nation)
+      {
+        const authToken = getCookie("authToken");
+        const members = this.state.committee.members || {};
+        const id = getID(members, nation);
+        if (authToken === members[id].authToken)
+        {
+          return members[id];
+        }
+      }
+    }
+    return null;
+  }
+
+  setMemberFromCookie = () => {
+    const nation = this.getNation();
+    if (nation){
+      const key = nameToMemberOption(nation.name).key;
+      const memberOptions = recoverMemberOptions(this.state.committee);
+      this.setState({ uploader: memberOptions.filter(c => c.value === key)[0] });
+    }
+  }
+
   renderUploader = () => {
     const { progress, state, errorCode, committee, file, uploader } = this.state;
 
@@ -494,6 +524,8 @@ export default class Files extends React.Component<Props, State> {
 
     const memberOptions = recoverMemberOptions(committee);
 
+    console.log(uploader);
+
     return (
       <Form onSubmit={this.postLink}>
         <Form.Input
@@ -513,7 +545,7 @@ export default class Files extends React.Component<Props, State> {
         />
         <Form.Group widths="equal">
           <Form.Dropdown
-            icon="search"
+            icon="none"
             key="uploader"
             required
             value={uploader ? uploader.key : undefined}
@@ -540,6 +572,10 @@ export default class Files extends React.Component<Props, State> {
 
     const memberOptions = recoverMemberOptions(committee);
 
+    if (!uploader) {
+      this.setMemberFromCookie();
+    }
+
     return (
       <Form onSubmit={this.postText}>
         <Form.TextArea
@@ -557,6 +593,7 @@ export default class Files extends React.Component<Props, State> {
             value={uploader ? uploader.key : undefined}
             search
             selection
+            disabled
             error={!uploader}
             onChange={this.setMember}
             options={memberOptions}

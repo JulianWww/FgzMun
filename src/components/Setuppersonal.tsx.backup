@@ -1,0 +1,188 @@
+import * as React from 'react';
+import * as firebase from 'firebase/app';
+import { CommitteeData } from './Committee';
+import { RouteComponentProps } from 'react-router';
+import { Container, Form, Grid, Header, Message, Segment, Icon, Checkbox } from 'semantic-ui-react';
+import { DropdownProps, CheckboxProps } from 'semantic-ui-react';
+import { URLParameters } from '../types';
+import { MemberOption } from "../constants"
+import { recoverMemberOptions } from "./Committee"
+import { Helmet } from 'react-helmet';
+import ConnectionStatus from './ConnectionStatus';
+import Loading from './Loading';
+import { MemberData } from "./Member"
+
+interface Props extends RouteComponentProps<URLParameters> {
+  committee: CommitteeData;
+  fref: firebase.database.Reference;
+}
+
+
+interface State {
+  committee?: CommitteeData;
+  committeeFref: firebase.database.Reference;
+  countryName?: string;
+  isVoting: boolean;
+}
+
+export default class Stats extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    //const { match } = props;
+
+    this.state = {
+      committeeFref: firebase
+        .database()
+        .ref('committees')
+        .child(this.props.match.params.committeeID),
+      isVoting: false
+    };
+  }
+
+  getName = (data: MemberOption[], key: string) => {
+    for (let entry of data)
+    {
+      if (entry.key === key)
+      {
+        return entry.text;
+      }
+    }
+    return "";
+  }
+
+  getID = (data: Record<string, MemberData>, key: string) => {
+    for (let element of Object.keys(data)){
+      if (data[element].name == key){
+        return element;
+      }
+    }
+    return "";
+  }
+
+  firebaseCallback = (committee: firebase.database.DataSnapshot | null) => {
+    if (committee) {
+      this.setState({ committee: committee.val() });
+    }
+  }
+
+  componentDidMount() {
+    this.state.committeeFref.on('value', this.firebaseCallback);
+  }
+
+  componentWillUnmount() {
+    this.state.committeeFref.off('value', this.firebaseCallback);
+  };
+
+  submint = () => {
+    if (this.state.countryName && this.state.committee)
+    {
+      console.log(this.props);
+      return;
+      /*const members = this.props.committee.members || {};
+      const id = this.getID(members, this.state.countryName);
+      const thisCountry = members[this.state.countryName];
+      console.log(members[id]);
+      members[id].voting = this.state.isVoting*/
+    }
+  };
+  setCountry = (event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
+    const value = this.getName(recoverMemberOptions(this.state.committee), (data.value as string));
+    this.setState({ countryName: value });
+  }
+
+  setVoting = (event: React.FormEvent<HTMLInputElement>, data: CheckboxProps) => {
+    this.setState({ isVoting: data.checked as boolean})
+  }
+
+  renderForm = (committee: CommitteeData) => {
+
+    const members = recoverMemberOptions(committee);
+    return (
+      <React.Fragment>
+        <Segment>
+          <Form onSubmit={this.submint}>
+            <Header as="h3">
+              One Last thing:
+            </Header>
+            <Form.Dropdown
+              label="Country name"
+              name="country name"
+              icon="search"
+              fluid
+              required
+              selection
+              search
+              onChange={this.setCountry}
+              options={members}>
+            </Form.Dropdown>
+            <Checkbox
+              id="isVotingCheckBox"
+              style={{ 'paddingRight': '50px' }}
+              label="Voting"
+              toggle
+              onChange={this.setVoting}
+              //onChange={
+              //  checkboxHandler<SettingsData>(
+              //    committeeFref.child('settings'),
+              //    'motionsArePublic')}
+            />
+            <Form.Button
+              style={{ 'marginTop': '20px' }}
+              primary
+              fluid
+            >
+              Join committee
+              <Icon name="arrow right" />
+            </Form.Button>
+          </Form>
+        </Segment>
+      </React.Fragment>
+    );
+  }
+
+  render() {
+    const { committee } = this.state;
+
+    if (committee) {
+      return (
+        <Container style={{ padding: '1em 0em' }}>
+          <Helmet>
+            <title>{`Join Committee - Muncoordinated`}</title>
+            <meta name="description" content="Login, create an account, or create
+                                        a committee with Muncoordinated now!" />
+          </Helmet>
+          <ConnectionStatus />
+          <Grid
+            columns="equal"
+            stackable
+          >
+            <Grid.Row>
+              <Grid.Column>
+                <Header as="h1" textAlign='center'>
+                  Muncoordinated
+                </Header>
+                <Message>
+                  <Message.Header>Browser compatibility notice</Message.Header>
+                    <p>
+                    Muncoordinated works best with newer versions of <a 
+                      href="https://www.google.com/chrome/">Google Chrome</a>.
+                     Use of other/older browsers has caused bugs and data loss.
+                    </p>
+                </Message>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              
+              <Grid.Column>
+                {this.renderForm(committee)}
+              </Grid.Column>
+            </Grid.Row>
+          </Grid>
+        </Container>
+      );
+    } else {
+      return <Loading />;
+    }
+  }
+}  

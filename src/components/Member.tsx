@@ -14,6 +14,8 @@ export interface MemberData {
   present: boolean;
   rank: Rank;
   voting: boolean;
+  frozen: boolean;
+  authToken?: string
 }
 
 const FLAG_NAME_SET = new Set(COUNTRY_OPTIONS.map(x => x.text));

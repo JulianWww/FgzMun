@@ -28,6 +28,9 @@ interface State {
   rank: Rank;
   voting: MemberData['voting'];
   present: MemberData['present'];
+  frozen: MemberData["frozen"];
+  globalPresent: boolean;
+  globalVoting: boolean;
 }
 
 const RANK_OPTIONS = [
@@ -64,12 +67,12 @@ export function makeCommitteeStats(data?: CommitteeData) {
   const canVoteNo: number       = present.filter(canVote).length;
   const nonNGONo: number        = present.filter(nonNGO).length;
 
-  const simpleMajority: number = Math.ceil(canVoteNo * 0.5);
-  const twoThirdsMajority: number = Math.ceil(canVoteNo * (2 / 3));
+  const simpleMajority: number = Math.ceil(canVoteNo * 0.5 + 0.1);
+  const twoThirdsMajority: number = Math.ceil(canVoteNo * (2 / 3) + 0.1);
 
   const quorum: number          = Math.ceil(absCanVote * 0.25);
-  const procedural: number      = Math.ceil(nonNGONo * 0.5);
-  const operative: number       = Math.ceil(canVoteNo * 0.5);
+  const procedural: number      = Math.ceil(nonNGONo * 0.5 + 0.1);
+  const operative: number       = Math.ceil(canVoteNo * 0.5 + 0.1);
   const hasQuorum: boolean      = presentNo >= quorum;
   const draftResolution: number = Math.ceil(canVoteNo * 0.25);
   const amendment: number       = Math.ceil(canVoteNo * 0.1);
@@ -162,7 +165,10 @@ export default class Admin extends React.Component<Props, State> {
       options: [],
       rank: Rank.Standard,
       voting: false,
-      present: true
+      present: true,
+      frozen: true,
+      globalPresent: true,
+      globalVoting: false
     };
   }
 
@@ -185,6 +191,7 @@ export default class Admin extends React.Component<Props, State> {
         </Table.Cell>
         <Table.Cell collapsing>
           <Checkbox 
+            className="members__checkbox--toggle-present"
             toggle 
             checked={member.present} 
             onChange={checkboxHandler<MemberData>(fref, 'present')} 
@@ -195,6 +202,13 @@ export default class Admin extends React.Component<Props, State> {
             toggle 
             checked={member.voting} 
             onChange={checkboxHandler<MemberData>(fref, 'voting')} 
+          />
+        </Table.Cell>
+        <Table.Cell collapsing>
+          <Checkbox 
+            toggle 
+            checked={member.frozen} 
+            onChange={checkboxHandler<MemberData>(fref, 'frozen')} 
           />
         </Table.Cell>
         <Table.Cell collapsing>
@@ -228,7 +242,8 @@ export default class Admin extends React.Component<Props, State> {
       name: this.state.member.text,
       rank: this.state.rank,
       present: this.state.present,
-      voting: this.state.voting
+      voting: this.state.voting,
+      frozen: this.state.frozen
     };
     
     this.props.fref.child('members').push().set(member);
@@ -251,6 +266,10 @@ export default class Admin extends React.Component<Props, State> {
 
   setVoting = (event: React.FormEvent<HTMLInputElement>, data: CheckboxProps) => {
     this.setState({ voting: data.checked || false });
+  }
+
+  setFrozen = (event: React.FormEvent<HTMLInputElement>, data: CheckboxProps) => {
+    this.setState({ frozen: data.checked || false });
   }
 
   setRank = (event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
@@ -279,8 +298,8 @@ export default class Admin extends React.Component<Props, State> {
   }
 
   renderAdder() {
-    const { handleAdd, setMember, setRank, setPresent, setVoting } = this;
-    const { present: newMemberPresent, voting: newMemberVoting, options: newOptions, member: newMember } = this.state;
+    const { handleAdd, setMember, setRank, setPresent, setVoting, setFrozen } = this;
+    const { present: newMemberPresent, voting: newMemberVoting, frozen: newMemberFrozen, options: newOptions, member: newMember } = this.state;
 
     return (
       <Table.Row>
@@ -327,6 +346,14 @@ export default class Admin extends React.Component<Props, State> {
             onChange={setVoting} 
           />
         </Table.HeaderCell>
+        <Table.HeaderCell collapsing >
+          <Checkbox 
+            className="adder__checkbox--toggle-frozen"
+            toggle 
+            checked={newMemberFrozen} 
+            onChange={setFrozen} 
+          />
+        </Table.HeaderCell>
         <Table.HeaderCell>
           <Button
             className="adder__button--add-member"
@@ -339,6 +366,25 @@ export default class Admin extends React.Component<Props, State> {
         </Table.HeaderCell>
       </Table.Row>
     );
+  }
+
+  setStateStatus = (pos: firebase.database.Reference, value: boolean) => {
+    pos.set(value);
+  }
+
+  setGlobalStatus(key: string)
+  {
+    return (
+      (event: React.FormEvent<HTMLInputElement>, data: CheckboxProps) => {
+        const members = this.props.committee.members || {};
+        const checked = data.checked;
+        if (!(checked === undefined))
+        {
+          Object.keys(members).map(id =>
+            this.setStateStatus(this.props.fref.child('members').child(id).child(key), checked)
+          );
+          }
+      }); 
   }
 
   CommitteeMembers = (props: { data: CommitteeData, fref: firebase.database.Reference }) => {
@@ -355,8 +401,28 @@ export default class Admin extends React.Component<Props, State> {
             <Table.Row>
               <Table.HeaderCell />
               <Table.HeaderCell>Rank</Table.HeaderCell>
-              <Table.HeaderCell>Present</Table.HeaderCell>
-              <Table.HeaderCell>Voting</Table.HeaderCell>
+              <Table.HeaderCell>Present
+                <Checkbox
+                  style={{"marginTop": "5px", "marginBottom": "-5px"}}
+                  toggle 
+                  //checked={this.state.globalPresent}
+                  onChange={this.setGlobalStatus("present")}
+                />
+              </Table.HeaderCell>
+              <Table.HeaderCell>Voting
+                <Checkbox
+                  style={{"marginTop": "5px", "marginBottom": "-5px"}}
+                  toggle 
+                  onChange={this.setGlobalStatus("voting")}
+                />
+              </Table.HeaderCell>
+              <Table.HeaderCell>Frozen
+                <Checkbox
+                  style={{"marginTop": "5px", "marginBottom": "-5px"}}
+                  toggle 
+                  onChange={this.setGlobalStatus("frozen")}
+                />
+              </Table.HeaderCell>
               <Table.HeaderCell />
             </Table.Row>
           </Table.Header>

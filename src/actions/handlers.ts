@@ -8,7 +8,7 @@ export function fieldHandler<T>
     fref.child(field.toString()).set(e.currentTarget.value);
 }
 
-function lens<P, S>(comp: React.Component<P, S>, field: keyof S, target: string, value: any) {
+export function lens<P, S>(comp: React.Component<P, S>, field: keyof S, target: string, value: any) {
     // @ts-ignore
     comp.setState(prevState => {
 

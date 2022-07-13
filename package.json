@@ -27,6 +27,7 @@
     "react-scripts": "3.4.3",
     "semantic-ui-css": "^2.4.0",
     "semantic-ui-react": "^0.88.1",
+    "sha512": "^0.0.1",
     "typescript": "3.7.2"
   },
   "devDependencies": {
@@ -34,7 +35,7 @@
     "netlify-plugin-cypress": "^1.4.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "HTTPS=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -47,5 +48,9 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "main": "index.js",
+  "repository": "https://github.com/JulianWww/Muncoordinated-2",
+  "author": "JulianWww <julian.wandhoven@gmail.com>",
+  "license": "MIT"
 }

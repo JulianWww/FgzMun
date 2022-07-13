@@ -5,6 +5,13 @@ import * as Sentry from "@sentry/react";
  * Homepage
  */
 
+export function logClickJoinACommitteeButton() {
+  send('clickJoinACommitteeHomepageButton', {
+    action: 'click',
+    category: 'JoinACommitteeHomepageButton'
+  });
+}
+
 export function logClickCreateACommitteeButton() {
   send('clickCreateACommitteeHomepageButton', {
     action: 'click',

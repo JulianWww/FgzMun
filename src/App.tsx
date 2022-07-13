@@ -16,6 +16,9 @@ import './App.css';
 import Onboard from './components/Onboard';
 import Homepage from './components/Homepage';
 import Committee from './components/Committee';
+import Join from "./components/Join"
+import JoinPolle from "./components/Vote"
+import JoinSelectCountry from "./components/Setuppersonal"
 import { NotFound } from './components/NotFound';
 
 const firebaseConfig = {
@@ -39,6 +42,9 @@ class App extends React.Component {
         <Route exact path="/" component={Homepage} />
         <Route exact path="/onboard" component={Onboard} />
         <Route exact path="/committees" component={Onboard} />
+        <Route exact path="/Join" component={Join} />
+        <Route exact path="/StrawPoll" component={JoinPolle}/>
+        <Route path="/Join/:committeeID" component={JoinSelectCountry} />
         <Route path="/committees/:committeeID" component={Committee} />
         <Route path="*">
           <NotFound item="page" id="unknown" />

@@ -13,7 +13,8 @@ import {
   stateValidatedNumberFieldHandler,
   stateMemberDropdownHandler,
   stateTextAreaHandler,
-  checkboxHandler
+  checkboxHandler,
+  lens
 } from '../actions/handlers';
 import { implies, sentenceCase, makeSentenceCaseDropdownOption, } from '../utils';
 import { TimerSetter, Unit, getSeconds } from './TimerSetter';
@@ -33,6 +34,8 @@ import { makeCommitteeStats } from './Admin';
 import { SettingsData } from './Settings';
 import { MotionsShareHint } from './ShareHint';
 import { useVoterID, VoterID } from '../hooks';
+import { getCookie } from "../cookie"
+import { getID } from "../utils";
 import _ from 'lodash';
 
 export type MotionID = string;
@@ -61,6 +64,23 @@ enum MotionType {
   ReorderDraftResolutions = 'Reorder Draft Resolutions',
   ProposeStrawpoll = 'Propose Strawpoll'
 }
+
+let ProceduralMotions = new Map<string, boolean>();
+ProceduralMotions.set(MotionType.OpenUnmoderatedCaucus, true);
+ProceduralMotions.set(MotionType.OpenModeratedCaucus, true);
+ProceduralMotions.set(MotionType.ExtendUnmoderatedCaucus, true);
+ProceduralMotions.set(MotionType.ExtendModeratedCaucus, true);
+ProceduralMotions.set(MotionType.CloseModeratedCaucus, true);
+ProceduralMotions.set(MotionType.IntroduceDraftResolution, false);
+ProceduralMotions.set(MotionType.IntroduceAmendment, false);
+ProceduralMotions.set(MotionType.SuspendDraftResolutionSpeakersList, false);
+ProceduralMotions.set(MotionType.VoteOnResolution, false);
+ProceduralMotions.set(MotionType.OpenDebate, true);
+ProceduralMotions.set(MotionType.SuspendDebate, true);
+ProceduralMotions.set(MotionType.ResumeDebate, true);
+ProceduralMotions.set(MotionType.CloseDebate, true);
+ProceduralMotions.set(MotionType.ReorderDraftResolutions, false);
+ProceduralMotions.set(MotionType.ProposeStrawpoll, false);
 
 const disruptiveness = (motionType: MotionType): number => {
   switch (motionType) {
@@ -514,6 +534,10 @@ export class MotionsComponent extends React.Component<Props & Hooks, State> {
     }
   }
 
+  isProceduralMotion(type: MotionType): boolean {
+    return (ProceduralMotions.get(type) || false);
+  }
+
   renderMotion = (id: MotionID, motionData: MotionData, motionFref: firebase.database.Reference) => {
     const { handleApproveMotion } = this;
     const { committee } = this.state;
@@ -525,18 +549,19 @@ export class MotionsComponent extends React.Component<Props & Hooks, State> {
 
     const resolution = recoverResolution(committee, resolutionTarget || '');
     const resolutionTargetText = resolution ? resolution.name : resolutionTarget;
-
-
+      
     const renderVoteCount = () => {
       const { voterID } = this.props;
       const votes = motionData.votes ?? {};
 
       // Remove vote if same vote, otherwise change vote
       const vote = (vote: MotionVote) => {
-        if (votes[voterID] === vote) {
-          motionFref.child('votes').child(voterID).remove();
-        } else {
-          motionFref.child('votes').child(voterID).set(vote);
+        if (this.isValidNation()) {
+          if (votes[voterID] === vote) {
+            motionFref.child('votes').child(voterID).remove();
+          } else {
+            motionFref.child('votes').child(voterID).set(vote);
+          }
         }
       }
 
@@ -551,6 +576,7 @@ export class MotionsComponent extends React.Component<Props & Hooks, State> {
                 color='red'
                 active={votes[voterID] === MotionVote.Against}
                 onClick={() => vote(MotionVote.Against)}
+                disabled={!this.isValidNation()}
               >
                 <Icon name={
                   votes[voterID] === MotionVote.Against
@@ -568,6 +594,7 @@ export class MotionsComponent extends React.Component<Props & Hooks, State> {
                 color='yellow'
                 active={votes[voterID] === MotionVote.Abstain}
                 onClick={() => vote(MotionVote.Abstain)}
+                disabled={!this.isValidNation() || this.isProceduralMotion(motionData.type)}
               >
                 <Icon name={
                   votes[voterID] === MotionVote.Abstain
@@ -584,6 +611,7 @@ export class MotionsComponent extends React.Component<Props & Hooks, State> {
                 color='green'
                 active={votes[voterID] === MotionVote.For}
                 onClick={() => vote(MotionVote.For)}
+                disabled={!this.isValidNation()}
               >
                 <Icon name={
                   votes[voterID] === MotionVote.For
@@ -705,6 +733,42 @@ export class MotionsComponent extends React.Component<Props & Hooks, State> {
     return proposer && seconder ? proposer === seconder : false;
   }
 
+  getNation() {
+    if (this.state.committee)
+    {
+      const nation = getCookie("nation");
+      if (nation)
+      {
+        const authToken = getCookie("authToken");
+        const members = this.state.committee.members || {};
+        const id = getID(members, nation);
+        if (authToken === members[id].authToken)
+        {
+          return members[id];
+        }
+      }
+    }
+    return null;
+  }
+  
+  isValidNation() {
+    if (this.state.committee)
+    {
+      const nation = getCookie("nation");
+      if (nation)
+      {
+        const authToken = getCookie("authToken");
+        const members = this.state.committee.members || {};
+        const id = getID(members, nation);
+        if (authToken === members[id].authToken)
+        {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   renderAdder = (committee?: CommitteeData): JSX.Element => {
     const { newMotion } = this.state;
     const { proposer, proposal, type, caucusUnit, caucusDuration, speakerUnit,
@@ -820,21 +884,33 @@ export class MotionsComponent extends React.Component<Props & Hooks, State> {
 
     const memberOptions = recoverPresentMemberOptions(this.state.committee);
 
+    const cookieNation = this.getNation();
     const proposerTree = (
       <Form.Dropdown
-        icon="search"
+        icon="none"
         key="proposer"
-        value={proposer ? nameToMemberOption(proposer).key : false}
+        value={cookieNation ? nameToMemberOption(cookieNation.name).key : false}
         search
-        error={!proposer || this.hasIdenticalProposerSeconder()}
+        error={!cookieNation || this.hasIdenticalProposerSeconder()}
         loading={!committee}
         selection
         fluid
+        disabled
         onChange={stateMemberDropdownHandler<Props, State>(this, 'newMotion', 'proposer', memberOptions)}
         options={memberOptions}
         label="Proposer"
+        style={{"opacity": "1 !important"}}
       />
     );
+    if (cookieNation) 
+    {
+      if (!this.state.newMotion.proposer){
+        const data = memberOptions.filter(c => c.text === cookieNation.name);
+        if (data[0]){
+          lens(this, 'newMotion', 'proposer', data[0].text);
+        }
+      }
+    }
 
     const seconderTree = (
       <Form.Dropdown

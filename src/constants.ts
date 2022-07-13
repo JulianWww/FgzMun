@@ -312,6 +312,7 @@ interface TemplateMember {
 }
 
 export enum CommitteeTemplate {
+  FGZUkrainWar = 'FGZ Ukrain War',
   AfricanUnion = 'African Union',
   ASEAN = 'Association of Southeast Asian Nations',
   BRICS = 'BRICS',
@@ -325,6 +326,31 @@ export enum CommitteeTemplate {
 }
 
 export const TEMPLATE_TO_MEMBERS: Record<CommitteeTemplate, TemplateMember[]> = {
+  'FGZ Ukrain War': [
+	{name: "Belarus"},
+	{name: "Canada"},
+	{name: "China"},
+	{name: "Czech Rebublic"},
+	{name: "Finland"},
+	{name: "france"},
+	{name: "Georgia"},
+	{name: "Germany"},
+	{name: "India"},
+	{name: "Israel"},
+	{name: "Italy"},
+	{name: "Mexico"},
+	{name: "North Korea"},
+	{name: "Norway"},
+	{name: "Poland"},
+	{name: "United States"},
+	{name: "Russia"},
+	{name: "Spain"},
+	{name: "Syria"},
+	{name: "Turkey"},
+	{name: "Ukraine"},
+	{name: "United Arab Emirates"},
+	{name: "United Kingdom"},
+  ],
   'African Union': [
     { name: 'Algeria' },
     { name: 'Angola' },

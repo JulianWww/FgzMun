@@ -14,7 +14,7 @@ import {
   Sidebar,
   Visibility,
 } from 'semantic-ui-react';
-import { logClickCreateACommitteeButton, logClickLogInButton, logClickSignupButton } from '../analytics';
+import { logClickJoinACommitteeButton, logClickCreateACommitteeButton, logClickLogInButton, logClickSignupButton } from '../analytics';
 import Loading from './Loading';
 import { ShareCapabilities } from './ShareHint';
 
@@ -54,6 +54,14 @@ const HomepageHeading = ({ mobile }: HomepageHeadingProps) => (
     <br />
     <Button as="a" primary size="huge" href="/onboard" onClick={logClickCreateACommitteeButton}>
       Create a committee
+      <Icon name="arrow right" />
+    </Button>
+    <Button as="a" primary size="huge" href="/join" onClick={logClickJoinACommitteeButton}>
+      Join a committee
+      <Icon name="arrow right" />
+    </Button><br />
+    <Button as="a" primary size="huge" href="/StrawPoll" style={{"marginTop": "5px"}}>
+      Vote on strawpoll
       <Icon name="arrow right" />
     </Button>
     <br />
