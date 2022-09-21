@@ -37,7 +37,7 @@ export const KEYBOARD_SHORTCUT_LIST = (
 
 export default class Help extends React.PureComponent<{}, {}> {
   gpl = ( 
-    <a href="https://github.com/MaxwellBo/Muncoordinated-2/blob/master/LICENSE">
+    <a href="https://github.com/JulianWww/Muncoordinated-2/blob/master/LICENSE">
       GNU GPLv3
     </a>
   );
@@ -60,9 +60,9 @@ export default class Help extends React.PureComponent<{}, {}> {
           <br />
           <List ordered>
             <List.Item>
-              Create an issue on the <a href="https://github.com/MaxwellBo/Muncoordinated-2/issues">
+              Create an issue on the <a href="https://github.com/JulianWww/Muncoordinated-2/issues">
                 Muncoordinated issue tracking page
-              </a>. You can also use this for help requests regarding the apps usage.
+              </a>. You can also use this for help requests regarding the apps usage
             </List.Item>
             <List.Item>
               Describe what you intended to do
@@ -81,11 +81,6 @@ export default class Help extends React.PureComponent<{}, {}> {
         <Header as="h3" attached="top">License</Header>
         <Segment attached="bottom">
           Muncoordinated is licensed under {gpl}
-        </Segment>
-        <Header as="h3" attached="top">Social media</Header>
-        <Segment attached="bottom">
-          Want to meet likeminded Muncoordinators? Come check out our 
-          forum <a href="https://github.com/MaxwellBo/Muncoordinated-2/discussions">The Muncoordinator's Discussion Space</a>.
         </Segment>
       </Container>
     );

@@ -3,18 +3,18 @@ import firebase from 'firebase/app';
 import { MemberData } from '../Member';
 import { CaucusData, recoverDuration, recoverUnit } from '../Caucus';
 import { MemberOption } from '../../constants';
-import { Segment, Button, Form, Label } from 'semantic-ui-react';
+import { Segment, Button, Form, Label, DropdownProps } from 'semantic-ui-react';
 import { TimerSetter, Unit } from '../TimerSetter';
 import { SpeakerEvent, Stance } from '..//caucus/SpeakerFeed';
 import { checkboxHandler, validatedNumberFieldHandler, dropdownHandler } from '../../actions/handlers';
 import { membersToPresentOptions } from '../../utils';
 import { getCookie } from "../../cookie"
-import { getID } from "../../utils";
 
 interface Props {
   caucus?: CaucusData;
   members?: Record<string, MemberData>;
   caucusFref: firebase.database.Reference;
+  isOwner: boolean;
 }
 
 function getNation(props: Props) {
@@ -23,13 +23,8 @@ function getNation(props: Props) {
     const nation = getCookie("nation");
     if (nation)
     {
-      const authToken = getCookie("authToken");
       const members = props.members || {};
-      const id = getID(members, nation);
-      if (authToken === members[id].authToken)
-      {
-        return members[id];
-      }
+      return members[nation];
     }
   }
   return null;
@@ -48,7 +43,7 @@ function getIdOfCookieNation(name: MemberData | null, members: MemberOption[] | 
 }
 
 export default function CaucusQueuer(props: Props) {
-  const { members, caucus, caucusFref } = props;
+  const { members, caucus, caucusFref, isOwner } = props;
   const [queueMember, setQueueMember] = React.useState<MemberOption | undefined>(undefined);
   const memberOptions = membersToPresentOptions(members);
 
@@ -66,6 +61,10 @@ export default function CaucusQueuer(props: Props) {
 
       props.caucusFref.child('queue').push().set(newEvent);
     }
+  }
+
+  const setMember = (event: React.SyntheticEvent<HTMLElement>, data: DropdownProps): void => {
+    setQueueMember(memberOptions.filter(c => c.value === data.value)[0]);
   }
 
   const setMemberManual = (value: string): void => {
@@ -88,17 +87,18 @@ export default function CaucusQueuer(props: Props) {
       <Label attached="top left" size="large">Queue</Label>
       <Form>
         <Form.Dropdown
-          icon="none"
+          icon="search"
           value={queueMember ? queueMember.value : undefined}
           search
           selection
-          disabled
+          disabled={!isOwner}
           loading={!caucus}
           error={!queueMember}
-          //onChange={setMember}
-          //options={memberOptions}
+          onChange={setMember}
+          options={memberOptions}
         />
         <TimerSetter
+          disabled={!isOwner}
           loading={!caucus}
           unitValue={recoverUnit(caucus)}
           placeholder="Speaking time"
@@ -109,6 +109,7 @@ export default function CaucusQueuer(props: Props) {
         <Form.Checkbox
           label="Delegates can queue"
           indeterminate={!caucus}
+          disabled={!isOwner}
           toggle
           checked={caucus ? (caucus.queueIsPublic || false) : false} // zoo wee mama
           onChange={checkboxHandler<CaucusData>(caucusFref, 'queueIsPublic')}

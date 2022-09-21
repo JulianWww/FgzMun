@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router';
 import { CommitteeData, recoverMembers, recoverSettings, recoverCaucus } from './Committee';
 import CaucusQueuer from './caucus/CaucusQueuer';
 import { textAreaHandler, dropdownHandler, fieldHandler } from '../actions/handlers';
-import { makeDropdownOption } from '../utils';
+import { makeDropdownOption, isOwner } from '../utils';
 import { URLParameters } from '../types';
 import { CaucusNextSpeaking } from './caucus/CaucusNextSpeaking';
 import { SpeakerEvent, SpeakerFeedEntry } from './caucus/SpeakerFeed';
@@ -41,6 +41,7 @@ interface State {
   committee?: CommitteeData;
   committeeFref: firebase.database.Reference;
   loading: boolean;
+  isOwner: boolean;
 }
 
 export type CaucusID = string;
@@ -88,17 +89,27 @@ export default class Caucus extends React.Component<Props, State> {
 
     const { match } = props;
 
+    const committee = firebase.database().ref('committees').child(match.params.committeeID);
+    const user = firebase.auth().currentUser
+    console.log("current user is: ");
+    console.log(user);
+    
     this.state = {
-      committeeFref: firebase.database().ref('committees').child(match.params.committeeID),
+      committeeFref: committee,
       caucusTimer: DEFAULT_CAUCUS.caucusTimer,
       speakerTimer: DEFAULT_CAUCUS.speakerTimer,
-      loading: true
+      loading: true,
+      isOwner: false,
     };
   }
 
   firebaseCallback = (committee: firebase.database.DataSnapshot | null) => {
     if (committee) {
       this.setState({ committee: committee.val(), loading: false });
+    }
+    const user = firebase.auth().currentUser;
+    if (user) {
+      this.setState({ isOwner: isOwner(this.state.committee, user)});
     }
   }
 
@@ -160,7 +171,7 @@ export default class Caucus extends React.Component<Props, State> {
   }
 
   renderNowSpeaking =  (caucus?: CaucusData) => {
-    const { speakerTimer } = this.state;
+    const { speakerTimer, isOwner } = this.state;
     
     const caucusFref = this.recoverCaucusFref();
 
@@ -169,8 +180,14 @@ export default class Caucus extends React.Component<Props, State> {
     return (
       <Segment loading={!caucus}>
         <Label attached="top left" size="large">Now speaking</Label>
-        <Feed size="large">
-          <SpeakerFeedEntry data={entryData} fref={caucusFref.child('speaking')} speakerTimer={speakerTimer}/>
+        <Feed size="large" disabled={!isOwner}>
+          <SpeakerFeedEntry 
+            data={entryData} 
+            fref={caucusFref.child('speaking')}
+            speaking={caucus ? caucus.speaking : undefined}
+            speakerTimer={speakerTimer}
+            owner={isOwner}
+          />
         </Feed>
       </Segment>
     );
@@ -186,7 +203,7 @@ export default class Caucus extends React.Component<Props, State> {
 
   renderCaucus = (caucus?: CaucusData) => {
     const { renderNowSpeaking, renderHeader, recoverCaucusFref } = this;
-    const { speakerTimer, committee } = this.state;
+    const { speakerTimer, committee, isOwner } = this.state;
 
     const { caucusID } = this.props.match.params;
     const caucusFref = recoverCaucusFref();
@@ -202,6 +219,7 @@ export default class Caucus extends React.Component<Props, State> {
         toggleKeyCode={83} // S - if changing this, update Help
         defaultUnit={recoverUnit(caucus)}
         defaultDuration={recoverDuration(caucus) || 60}
+        isOwner={isOwner}
       />
     );
 
@@ -214,6 +232,7 @@ export default class Caucus extends React.Component<Props, State> {
         toggleKeyCode={67} // C - if changing this, update Help
         defaultUnit={Unit.Minutes}
         defaultDuration={10}
+        isOwner={isOwner}
       />
     );
 
@@ -235,7 +254,8 @@ export default class Caucus extends React.Component<Props, State> {
       <CaucusQueuer 
         caucus={caucus} 
         members={members} 
-        caucusFref={caucusFref} 
+        caucusFref={caucusFref}
+        isOwner={isOwner}
       />
     );
 
@@ -245,6 +265,7 @@ export default class Caucus extends React.Component<Props, State> {
         fref={caucusFref} 
         speakerTimer={speakerTimer} 
         autoNextSpeaker={autoNextSpeaker}
+        owner={isOwner}
       />
     );
 

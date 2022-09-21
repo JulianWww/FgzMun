@@ -75,13 +75,13 @@ export default class JoinPolle extends React.Component<Props, State> {
         <Segment>
         <Form onSubmit={this.handleSubmit}>
             <Form.Input
-              label="Name"
+              label="Poll Key"
               name="key"
               fluid
               value={this.state.key}
               required
               error={!this.state.key}
-              placeholder="Committee name"
+              placeholder="aaa-aaa-aaa:bbb-bbb"
               onChange={this.handleInput}
             />
             <Form.Button
@@ -90,7 +90,7 @@ export default class JoinPolle extends React.Component<Props, State> {
               disabled={!this.state.isValid}
               
             >
-              Join committee
+              Vote
               <Icon name="arrow right" />
             </Form.Button>
           </Form>

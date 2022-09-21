@@ -6,3 +6,11 @@
 .ui.dropdown.centered {
   text-align: center;
 }
+
+.tab {
+  margin-left: 20px;
+}
+
+.visible {
+  display: block !important;
+}

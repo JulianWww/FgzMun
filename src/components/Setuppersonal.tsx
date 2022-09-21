@@ -1,4 +1,5 @@
 import * as React from 'react';
+import  { Redirect } from 'react-router-dom'
 import * as firebase from 'firebase/app';
 import { CommitteeData } from './Committee';
 import { RouteComponentProps } from 'react-router';
@@ -12,6 +13,8 @@ import ConnectionStatus from './ConnectionStatus';
 import Loading from './Loading';
 import { setCookie } from "../cookie";
 import { getID } from "../utils";
+import { siteBase } from "../data";
+import { Rank } from './Member';
 
 interface Props extends RouteComponentProps<URLParameters> {
   committee: CommitteeData;
@@ -25,6 +28,7 @@ interface State {
   countryName?: string;
   isVoting: boolean;
   isValid: boolean;
+  moveOn: boolean;
 }
 
 export default class Stats extends React.Component<Props, State> {
@@ -39,7 +43,8 @@ export default class Stats extends React.Component<Props, State> {
         .ref('committees')
         .child(this.props.match.params.committeeID),
       isVoting: false,
-      isValid: true
+      isValid: true,
+      moveOn: false
     };
   }
 
@@ -79,29 +84,52 @@ export default class Stats extends React.Component<Props, State> {
     return out;
   }
 
+  loginError(reasons: any) {
+    alert (reasons)
+  }
+
+
+  async rankRequirements(id: string) {
+    const { committee } = this.state;
+    if (committee != undefined) {
+      const { members } = committee;
+      if ( members != undefined) {
+        const { rank } = members[id];
+        if (rank === Rank.Veto) {
+          await this.state.committeeFref.child("members").child(id).child("voting").set(true);
+        }
+      }
+    }
+  }
+
+  async setDBData(id: string) {
+    const key = this.getKey();
+    setCookie("nation", this.state.countryName);
+    //setCookie("authToken", key);
+    
+    await this.state.committeeFref.child("members").child(id).child("voting").set(this.state.isVoting);
+    //await this.state.committeeFref.child("members").child(id).child("authToken").set(key);
+    await this.state.committeeFref.child("members").child(id).child("present").set(true);
+    await this.rankRequirements(id);
+    this.setState({ moveOn: true })
+  }
+
   submint = () => {
     this.showError("NoSelectionError", true);
+    this.showError("RedirectionError", true);
     if (this.state.countryName && this.state.committee)
     {
       const members = this.state.committee.members || {};
-      const id = getID(members, this.state.countryName);
       this.showError("presentError", true);
       this.showError("frozenError", true);
-      if ((!members[id].present) && (!members[id].frozen))
+      if ((!members[this.state.countryName].frozen))
       {
-        this.state.committeeFref.child('members').child(id).child("voting").set(this.state.isVoting);
-        this.state.committeeFref.child("members").child(id).child("present").set(true);
-        setCookie("nation", this.state.countryName);
-        const key = this.getKey();
-        setCookie("authToken", key);
-        this.state.committeeFref.child("members").child(id).child("authToken").set(key);
-
-        window.location.href = '/committees/'+this.props.match.params.committeeID;
+        this.setDBData(this.state.countryName);
       }
-      if (members[id].present) {
+      if (members[this.state.countryName].present) {
         this.showError("presentError", false);
       }
-      if (members[id].frozen){
+      if (members[this.state.countryName].frozen){
         this.showError("frozenError", false);
       }
     }
@@ -110,8 +138,13 @@ export default class Stats extends React.Component<Props, State> {
     }
   };
   setCountry = (event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
-    const value = this.getName(recoverMemberOptions(this.state.committee), (data.value as string));
-    this.setState({ countryName: value });
+    if (this.state.committee && this.state.committee.members && data.value) {
+      const value = this.getName(recoverMemberOptions(this.state.committee), (data.value as string));
+      const members = this.state.committee.members || {};
+      const id = getID(members, value);
+      this.setState({ countryName: id });
+      this.showError("frozenError", !this.state.committee.members[id].frozen);
+    }
   }
 
   setVoting = (event: React.FormEvent<HTMLInputElement>, data: CheckboxProps) => {
@@ -134,10 +167,16 @@ export default class Stats extends React.Component<Props, State> {
   renderForm = (committee: CommitteeData) => {
 
     const members = recoverMemberOptions(committee);
+    if (this.state.moveOn) {
+      console.log("redirecting");
+      return (
+        <Redirect to={siteBase + '/committees/' + this.props.match.params.committeeID}  />
+      )
+    }
     return (
       <React.Fragment>
         <Segment>
-          <Form onSubmit={this.submint}>
+          <Form>
             <Header as="h3">
               One Last thing:
             </Header>
@@ -164,11 +203,11 @@ export default class Stats extends React.Component<Props, State> {
               //    committeeFref.child('settings'),
               //    'motionsArePublic')}
             />
-            <Message error id="presentError">
+            <Message warning id="presentError">
               <Message.Header>
                 Country already Selected
               </Message.Header>
-                A differant delegate has already selected "{this.state.countryName}". If this is your country please contact the chair.
+                A different delegate has already selected this country. This is mearly informational.
             </Message>
             <Message error id="frozenError">
               <Message.Header>
@@ -182,10 +221,17 @@ export default class Stats extends React.Component<Props, State> {
               </Message.Header>
                 Select a country to proceed.
             </Message>
+            <Message success className={this.state.moveOn ? "visible" : ""}>
+              <Message.Header>
+                Redirection
+              </Message.Header>
+              If you are not automatically redirected click <a href={siteBase + '/committees/' + this.props.match.params.committeeID}>here</a>
+            </Message>
             <Form.Button
               style={{ 'marginTop': '20px' }}
               primary
               fluid
+              onClick={this.submint}
             >
               Join committee
               <Icon name="arrow right" />

@@ -1,9 +1,13 @@
 /* eslint-disable no-mixed-operators */
 /* eslint-disable eqeqeq */
+import * as firebase from 'firebase/app';
 import { MemberOption } from './constants';
 import { MemberID, nameToMemberOption, MemberData } from './components/Member';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { CommitteeData } from "./components/Committee"
+import { getCookie } from "./cookie"
 
 export function implies(a: boolean, b: boolean) {
   return a ? b : true;
@@ -110,3 +114,40 @@ export function getID(data: Record<string, MemberData>, key: string){
   }
   return "";
 }
+
+export function Owner() {
+  const [user] = useAuthState(firebase.auth());
+  return (!(user === null));
+}
+
+export function GetUser() {
+  const [user] = useAuthState(firebase.auth());
+  return user;
+}
+
+export function isOwner(committee: CommitteeData | null | undefined, user: firebase.User | null | undefined) {
+  if (user && committee) {
+    return user.uid === committee.creatorUid
+  }
+  return false;
+}
+export function isOwnerRef(committee: firebase.database.Reference, user: firebase.User | null | undefined) {
+  if (user) {
+    return user.uid === committee.child("creatorUid").toString()
+  }
+  return false;
+}
+
+export function getNationData(committee: CommitteeData | null | undefined): MemberData | null {
+  if (committee)
+  {
+    const nation = getCookie("nation");
+    if (nation)
+    {
+      const members = committee.members || {};
+      return members[nation];
+    }
+  }
+  return null;
+}
+export const isConmitteeOwner = isOwner;

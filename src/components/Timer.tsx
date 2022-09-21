@@ -14,6 +14,10 @@ interface Props {
   defaultDuration: number;
 }
 
+interface Hook {
+  isOwner?: boolean;
+}
+
 interface State {
   timer?: TimerData;
   timerId?: NodeJS.Timer;
@@ -86,8 +90,8 @@ export function toggleTicking({
   }
 }
 
-export default class Timer extends React.Component<Props, State> {
-  constructor(props: Props) {
+export default class Timer extends React.Component<Props & Hook, State> {
+  constructor(props: Props & Hook) {
     super(props);
 
     const { defaultUnit, defaultDuration } = this.props;
@@ -245,6 +249,7 @@ export default class Timer extends React.Component<Props, State> {
   render() {
     const { setUnit, setDuration } = this;
     const { timer, mute } = this.state;
+    const { isOwner } = this.props;
 
     const remaining = timer ? timer.remaining : DEFAULT_TIMER.remaining;
     const elapsed = timer ? timer.elapsed : DEFAULT_TIMER.elapsed;
@@ -263,6 +268,7 @@ export default class Timer extends React.Component<Props, State> {
           negative={timer ? timer.remaining < 0 : false}
           size="massive"
           onClick={() => this.localToggleTicking()}
+          disabled={!isOwner}
         >
           {formatted}
         </Button>
@@ -278,15 +284,17 @@ export default class Timer extends React.Component<Props, State> {
         </Button>
 
         <Progress percent={percentage} active={false} indicating={true}/>
-        <Form>
-          <TimerSetter
-            unitValue={this.state.unitDropdown}
-            durationValue={this.state.durationField}
-            onDurationChange={setDuration}
-            onUnitChange={setUnit}
-            onSet={this.set}
-          />
-        </Form>
+        {isOwner ? 
+          <Form>
+            <TimerSetter
+              unitValue={this.state.unitDropdown}
+              durationValue={this.state.durationField}
+              onDurationChange={setDuration}
+              onUnitChange={setUnit}
+              onSet={this.set}
+            />
+          </Form>
+        : null}
       </Segment>
     );
   }

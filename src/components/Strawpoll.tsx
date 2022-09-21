@@ -5,7 +5,6 @@ import { URLParameters } from '../types';
 import { getStrawpollRef } from '../actions/strawpoll-actions';
 import { useObject } from 'react-firebase-hooks/database';
 import { Container, Header, Input, Button, List, Icon, Checkbox, Form, Modal, CheckboxProps, DropdownProps, Progress, Dropdown } from 'semantic-ui-react';
-import { checkboxHandler } from '../actions/handlers';
 import { Helmet } from 'react-helmet';
 import { fieldHandler, clearableZeroableValidatedNumberFieldHandler } from '../actions/handlers';
 import Loading from './Loading';
@@ -40,7 +39,6 @@ export const DEFAULT_STRAWPOLL: StrawpollData = {
   type: StrawpollType.Checkbox,
   medium: StrawpollMedium.Link,
   options: {},
-  optionsArePublic: false
 }
 
 export interface StrawpollData {
@@ -48,8 +46,7 @@ export interface StrawpollData {
   type: StrawpollType
   stage: StrawpollStage
   medium?: StrawpollMedium
-  options?: Record<StrawpollOptionID, StrawpollOptionData>,
-  optionsArePublic?: boolean
+  options?: Record<StrawpollOptionID, StrawpollOptionData>
 }
 
 export interface StrawpollOptionData {
@@ -130,6 +127,7 @@ export default function Strawpoll(props: StrawpollProps) {
     const strawpollFref = getStrawpollRef(committeeID, strawpollID)
     const  [value, loading] = useObject(strawpollFref);
     const [user] = useAuthState(firebase.auth());
+    console.log(user);
     const [voterID] = useVoterID()
     const [modalOpen, setOpen] = React.useState(false)
 
@@ -323,53 +321,41 @@ export default function Strawpoll(props: StrawpollProps) {
     switch (stage) {
       case StrawpollStage.Preparing:
         return (
-          <List>
-            <List.Item>
-              <Button.Group fluid>
-                <Dropdown
+          <Button.Group fluid>
+            <Dropdown
+              basic 
+              button
+              className="purple centered"
+              upward={false}
+              options={[{
+                key: StrawpollType.Checkbox,
+                value: StrawpollType.Checkbox,
+                text: "Choose many",
+                icon: "check square"
+              }, {
+                key: StrawpollType.Radio,
+                value: StrawpollType.Radio,
+                text: "Choose one",
+                icon: "radio"
+              }]}
+              onChange={togglePollType}
+              value={type}
+            />
+            <DeleteStrawpollModal 
+              open={modalOpen} 
+              onChangeOpenState={setOpen} 
+              onConfirm={deleteStrawpoll} 
+              trigger={
+                <Button
+                  color="red"
                   basic
-                  button
-                  className="purple centered"
-                  upward={false}
-                  options={[{
-                    key: StrawpollType.Checkbox,
-                    value: StrawpollType.Checkbox,
-                    text: "Choose many",
-                    icon: "check square"
-                  }, {
-                    key: StrawpollType.Radio,
-                    value: StrawpollType.Radio,
-                    text: "Choose one",
-                    icon: "radio"
-                  }]}
-                  onChange={togglePollType}
-                  value={type}
-                />
-                <DeleteStrawpollModal
-                  open={modalOpen}
-                  onChangeOpenState={setOpen}
-                  onConfirm={deleteStrawpoll}
-                  trigger={
-                    <Button
-                      color="red"
-                      basic
-                      onClick={()=> setOpen(true)}
-                    >
-                      <Icon name="delete" />Delete strawpoll?
-                    </Button>
-                  }
-                />
-              </Button.Group>
-            </List.Item>
-            <List.Item >
-              <Checkbox
-                label="Delegates can add options"
-                toggle
-                checked={strawpoll ? (strawpoll.optionsArePublic || false) : false}
-                onClick={checkboxHandler<StrawpollData>(strawpollFref, 'optionsArePublic')}
-              />
-            </List.Item>
-          </List>
+                  onClick={()=> setOpen(true)}
+                >
+                  <Icon name="delete" />Delete strawpoll?
+                </Button>
+              } 
+            />
+          </Button.Group>
         )
         case StrawpollStage.Voting:
           return medium === StrawpollMedium.Link 

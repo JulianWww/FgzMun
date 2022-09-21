@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import { MemberID, nameToMemberOption, MemberData, Rank } from './Member';
 import { AmendmentID, AmendmentData, DEFAULT_AMENDMENT, AMENDMENT_STATUS_OPTIONS, recoverLinkedCaucus } from './Amendment';
 import {
-  Card, Button, Form, Dropdown, Segment, Input, TextArea,
+  Card, Button, Form, Dropdown, Segment, Input, TextArea, DropdownProps,
   List, SemanticICONS, Icon, Tab, Grid, SemanticCOLORS, Container, Message, Label, Popup, Statistic, DropdownItemProps, TabProps
 } from 'semantic-ui-react';
 import { Helmet } from 'react-helmet';
@@ -23,8 +23,8 @@ import { putCaucus } from '../actions/caucus-actions';
 import { Stance } from './caucus/SpeakerFeed';
 import { NotFound } from './NotFound';
 import Files from './Files';
-import { getCookie } from "../cookie"
-import { getID } from "../utils";
+import { getID, Owner, isConmitteeOwner, getNationData } from "../utils";
+import { siteBase } from "../data"
 
 
 const TAB_ORDER = ['feed', 'text', 'amendments', 'voting'];
@@ -32,7 +32,7 @@ const TAB_ORDER = ['feed', 'text', 'amendments', 'voting'];
 export const IDENTITCAL_PROPOSER_SECONDER = (
   <Message
     error
-    content="A resolution's proposer and seconder cannot be the same"
+    content="A resolution's proposer cannot be a sponsor at the same"
   />
 );
 
@@ -45,27 +45,6 @@ export const DELEGATES_CAN_AMEND_NOTICE = (
   </Message>
 );
 
-
-function DeleteResolutionModal(props: { onConfirm: () => void }) {
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-
-  return (<>
-      <Dropdown.Item negative fluid basic
-          onClick={() => setIsModalOpen(true)}
-      >
-        <Icon name="delete" /> Delete resolution?
-      </Dropdown.Item>
-      <Confirm
-        open={isModalOpen}
-        header='Delete resolution?'
-        content='Are you sure? This is irreversible and will delete all
-                  posts, text, amendments and voting history. You might want to close the resolution (top right dropdown) instead?'
-        onCancel={() => setIsModalOpen(false)}
-        onConfirm={() => { setIsModalOpen(false); props.onConfirm() }}
-      />
-    </>)
-}
-
 interface Props extends RouteComponentProps<URLParameters> {
 }
 
@@ -75,6 +54,7 @@ interface State {
   authUnsubscribe?: () => void;
   user?: firebase.User | null;
   loading: boolean;
+  isOwner: boolean;
 }
 
 export enum ResolutionStatus {
@@ -132,13 +112,18 @@ export interface ResolutionData {
   name: string;
   link: string;
   proposer?: MemberID;
-  seconder?: MemberID;
+  sponsors?: MemberID[];
+  signatories?: MemberID[];
   status: ResolutionStatus;
   caucus?: CaucusID;
   amendments?: Record<AmendmentID, AmendmentData>;
   votes?: Votes;
   amendmentsArePublic?: boolean; // TODO: Migrate
   requiredMajority?: Majority; // TODO: Migrate
+}
+
+interface Hooks {
+  isOwner: boolean
 }
 
 export enum Vote {
@@ -159,18 +144,17 @@ export const DEFAULT_RESOLUTION: ResolutionData = {
   requiredMajority: Majority.Simple
 };
 
-export default class Resolution extends React.Component<Props, State> {
-  constructor(props: Props) {
+export default class ResolutionPage extends React.Component<Props & Hooks, State> {
+  constructor(props: Props & Hooks) {
     super(props);
-
     const { match } = props;
 
     this.state = {
       committeeFref: firebase.database().ref('committees').child(match.params.committeeID),
-      loading: true
+      loading: true,
+      isOwner: props.isOwner
     };
   }
-
   authStateChangedCallback = (user: firebase.User | null) => {
     this.setState({ user: user });
   }
@@ -208,7 +192,21 @@ export default class Resolution extends React.Component<Props, State> {
   }
 
   handlePushAmendment = (): void => {
-    this.recoverResolutionFref().child('amendments').push().set(DEFAULT_AMENDMENT);
+    let myAmanedment = DEFAULT_AMENDMENT;
+    const nation = this.getNation();
+    if (nation) {
+      myAmanedment.proposer = nation.name;
+      this.recoverResolutionFref().child('amendments').push().set(myAmanedment);
+    }
+    else if (this.isOwner()) {
+      this.recoverResolutionFref().child("amendments").push().set(myAmanedment);
+    }
+  }
+
+  canAmend = () => {
+    const nation = this.getNation();
+    const resolutionFref = this.recoverResolutionFref();
+    return (nation !== null && true ) || this.isOwner();
   }
 
   handleProvisionAmendment = (id: AmendmentID, amendment: AmendmentData) => {
@@ -238,13 +236,13 @@ export default class Resolution extends React.Component<Props, State> {
 
     if (caucusID) {
       this.props.history
-        .push(`/committees/${committeeID}/caucuses/${caucusID}`);
+        .push(`${siteBase}/committees/${committeeID}/caucuses/${caucusID}`);
     }
   }
 
   handleProvisionResolution = (resolutionData: ResolutionData) => {
     const { committeeID } = this.props.match.params;
-    const { proposer, seconder, name } = resolutionData;
+    const { proposer, name } = resolutionData;
 
     const newCaucus: CaucusData = {
       ...DEFAULT_CAUCUS,
@@ -258,38 +256,46 @@ export default class Resolution extends React.Component<Props, State> {
 
     const ref = putCaucus(committeeID, newCaucus);
 
-    ref.child('queue').push().set({
+    /*ref.child('queue').push().set({
       duration: DEFAULT_CAUCUS.speakerTimer.remaining,
       who: seconder,
       stance: Stance.For,
-    });
+    });*/
 
     this.recoverResolutionFref().child('caucus').set(ref.key);
 
     this.gotoCaucus(ref.key);
   }
 
-  renderAmendment = (id: AmendmentID, amendment: AmendmentData, amendmentFref: firebase.database.Reference) => {
+  isOwner() {
+    const { user, committee } = this.state;
+    console.log("USER AND OWNER")
+    if (user && committee) {
+      console.log(user.uid);
+      console.log(committee.creatorUid);
+      console.log(user.uid === committee.creatorUid);
+      return user.uid === committee.creatorUid;
+    }
+    return false;
+  }
+
+  renderAmendment = (id: AmendmentID, amendment: AmendmentData, amendmentFref: firebase.database.Reference, yourNation: string | null) => {
     const { handleProvisionAmendment } = this;
     const { proposer, text, status } = amendment;
-    const { user, committee } = this.state;
+ 
+    const hasAuth = this.isOwner();
 
     const textArea = (
       <TextArea
         value={text}
         label="Text"
         autoHeight
+        disabled={!(hasAuth || (proposer === yourNation && yourNation))}
         onChange={textAreaHandler<AmendmentData>(amendmentFref, 'text')}
         rows={1}
         placeholder="Text"
       />
     );
-
-    let hasAuth = false;
-
-    if (committee && user) {
-      hasAuth = committee.creatorUid === user.uid;
-    }
 
     const statusDropdown = (
       <Dropdown
@@ -301,7 +307,6 @@ export default class Resolution extends React.Component<Props, State> {
     );
 
     const memberOptions = recoverMemberOptions(this.state.committee);
-
     const proposerDropdown = (
       <Form.Dropdown
         key="proposer"
@@ -311,6 +316,7 @@ export default class Resolution extends React.Component<Props, State> {
         search
         selection
         fluid
+        disabled={!(hasAuth)}// || (proposer === yourNation && yourNation))}
         label="Proposer"
         placeholder="Proposer"
         onChange={memberDropdownHandler<AmendmentData>(amendmentFref, 'proposer', memberOptions)}
@@ -364,7 +370,7 @@ export default class Resolution extends React.Component<Props, State> {
     );
   }
 
-  setVote = (memberID: MemberID, member: MemberData, newVote: Vote) => {
+  setVote = (memberID: MemberID, member: MemberData, newVote?: Vote) => {
     const { resolutionID, committeeID } = this.props.match.params;
     voteOnResolution(committeeID, resolutionID, memberID, newVote);
   }
@@ -384,12 +390,20 @@ export default class Resolution extends React.Component<Props, State> {
       icon = 'remove';
     }
 
+    const reset = isConmitteeOwner(this.state.committee, this.state.user) ? 
+                    (key: string, member: MemberData, vote: Vote | undefined) => {
+                      return this.setVote(key, member, undefined)
+                    } : 
+                    (key: string, member: MemberData, vote: Vote | undefined) => {
+                      return this.setVote(key, member, vote);
+                    }
+
     const button = (
       <Button
         floated="left"
         color={color}
         icon
-        //onClick={() => cycleVote(key, member, vote)}
+        onClick={() => reset(key, member, vote)}
         //disabled
       >
         <Icon
@@ -435,7 +449,7 @@ export default class Resolution extends React.Component<Props, State> {
     return <CommitteeStats verbose={false} data={committee} />;
   }
 
-  renderCount = (key: string, color: SemanticCOLORS, icon: SemanticICONS, count: number, vote: Vote) => {
+  renderCount = (key: string, color: SemanticCOLORS, icon: SemanticICONS, count: number, vote: Vote, votes: Votes) => {
     const { setVote } = this;
     const { committee } = this.state;
     const members = (committee ? committee.members : undefined) || {};
@@ -446,7 +460,9 @@ export default class Resolution extends React.Component<Props, State> {
       nationName = nationData.name;
     }
     const id = getID(members, nationName);
-
+    const hasVoted = (votes[id] !== undefined)
+    console.log(votes);
+    console.log(hasVoted);
 
     const trigger = (
       <Button
@@ -454,6 +470,7 @@ export default class Resolution extends React.Component<Props, State> {
         color={color}
         icon
         fluid
+        disabled={(nationData ? nationData.voting && vote === Vote.Abstaining: true) || hasVoted}
         onClick={() => setVote(id, members[id], vote)}
       >
         {key.toUpperCase()}: {count}
@@ -474,12 +491,8 @@ export default class Resolution extends React.Component<Props, State> {
             color={color === 'yellow' ? 'black' : undefined}
           />
         </Button> */}
-        <Popup 
-          trigger={trigger}
-          hoverable={true}
-        >
-          {this.renderStats()}
-        </Popup>
+        
+        {trigger}
       </Grid.Column>
     );
   }
@@ -562,9 +575,9 @@ export default class Resolution extends React.Component<Props, State> {
           {columns}
         </Grid>
         <Grid columns="equal">
-          {renderCount('yes', 'green', 'plus', fors, Vote.For)}
-          {renderCount('no', 'red', 'remove', againsts, Vote.Against)}
-          {renderCount('abstaining', 'yellow', 'minus', abstains, Vote.Abstaining)}
+          {renderCount('yes', 'green', 'plus', fors, Vote.For, votes)}
+          {renderCount('abstaining', 'yellow', 'minus', abstains, Vote.Abstaining, votes)}
+          {renderCount('no', 'red', 'remove', againsts, Vote.Against, votes)}
         </Grid>
         {resolutionPassed && <Statistic inverted>
           <Statistic.Value>Passed</Statistic.Value>
@@ -589,21 +602,19 @@ export default class Resolution extends React.Component<Props, State> {
   }
 
   getNation() {
-    if (this.state.committee)
-    {
-      const nation = getCookie("nation");
-      if (nation)
-      {
-        const authToken = getCookie("authToken");
-        const members = this.state.committee.members || {};
-        const id = getID(members, nation);
-        if (authToken === members[id].authToken)
-        {
-          return members[id];
-        }
-      }
-    }
-    return null;
+    return getNationData(this.state.committee);
+  }
+  
+  editSponsors(resolutionFref: firebase.database.Reference) {
+    return ((event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
+      resolutionFref.child("sponsors").set(data.value);
+    });
+  }
+
+  editSignatories(resolutionFref: firebase.database.Reference) {
+    return ((event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
+      resolutionFref.child("signatories").set(data.value);
+    });
   }
 
   renderMeta = (resolution?: ResolutionData) => {
@@ -619,22 +630,28 @@ export default class Resolution extends React.Component<Props, State> {
       ? resolution.proposer
       : undefined;
 
-    const seconder = resolution
-      ? resolution.seconder
+    const sponsors = resolution
+      ? resolution.sponsors
       : undefined;
 
-    const hasIdenticalProposerSeconder = cookieNation && seconder ? cookieNation.name === seconder : false;
+    const signatories = resolution
+      ? resolution.signatories
+      : undefined;
+    
+    const emptyStringArray: string[] = [];
+
+    //const hasIdenticalProposerSeconder = cookieNation && seconder ? cookieNation.name === seconder : false;
 
     const proposerTree = (
       <Form.Dropdown
         key="proposer"
         icon="search"
         value={proposer ? nameToMemberOption(proposer).key : undefined}
-        error={!proposer || hasIdenticalProposerSeconder}
+        error={!proposer}
         loading={!resolution}
         search
         selection
-        disabled
+        disabled={!this.isOwner()}
         fluid
         onChange={memberDropdownHandler<ResolutionData>(resolutionFref, 'proposer', memberOptions)}
         options={memberOptions}
@@ -647,26 +664,48 @@ export default class Resolution extends React.Component<Props, State> {
         resolutionFref.child("proposer").set(memberOptions.filter(c => c.key === nameToMemberOption(cookieNation.name).key)[0].text);
       }
     }
+
     let cookieNationName = "";
-    if (cookieNation){cookieNationName = cookieNation.name}
+    if (cookieNation){cookieNationName = cookieNation.name; console.log("by")}
     const seconderTree = (
       <Form.Dropdown
         key="seconder"
         loading={!resolution}
         icon="search"
-        value={seconder ? nameToMemberOption(seconder).key : undefined}
-        error={!seconder || hasIdenticalProposerSeconder}
+        value={sponsors ? sponsors.map(function (name) {
+          return nameToMemberOption(name).key;
+        }) : emptyStringArray}
+        error={!sponsors}// || hasIdenticalProposerSeconder}
         search
+        multiple
         selection
         fluid
-        disabled={(proposer) ? !(cookieNationName === nameToMemberOption(proposer).text): false}
-        onChange={memberDropdownHandler<ResolutionData>(resolutionFref, 'seconder', memberOptions)}
+        disabled={(proposer) ? !(cookieNationName === nameToMemberOption(proposer).text || this.isOwner()): !this.isOwner()}
+        onChange={this.editSponsors(resolutionFref)}
         options={memberOptions}
-        label="Seconder"
+        label="Sponsors"
       />
     );
 
-    const hasError = hasIdenticalProposerSeconder;
+    const signatoryTree = (
+      <Form.Dropdown
+        key="signatories"
+        loading={!resolution}
+        icon="search"
+        value={signatories ? signatories.map(function (name) {
+          return nameToMemberOption(name).key;
+        }) : emptyStringArray}
+        //error={!sponsors}// || hasIdenticalProposerSeconder}
+        search
+        multiple
+        selection
+        fluid
+        disabled={(proposer) ? !(cookieNationName === nameToMemberOption(proposer).text || this.isOwner()): !this.isOwner()}
+        onChange={this.editSignatories(resolutionFref)}
+        options={memberOptions}
+        label="Signatories"
+      />
+    );
 
     const provisionTree = this.hasLinkedCaucus(resolution) ? (
       <Form.Button
@@ -681,7 +720,7 @@ export default class Resolution extends React.Component<Props, State> {
         // if there's no linked caucus
         <Form.Button
           loading={!resolution}
-          disabled={!resolution || !resolution.proposer || !resolution.seconder || hasError}
+          disabled={!resolution || !resolution.proposer}
           onClick={() => handleProvisionResolution(resolution!)}
         >
           Provision caucus
@@ -691,24 +730,36 @@ export default class Resolution extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <Segment attached={amendmentsArePublic(resolution) ? 'top' : undefined}>
-          <Form error={hasError}>
+          <Form>
             {proposerTree}
             {seconderTree}
+            {signatoryTree}
             {IDENTITCAL_PROPOSER_SECONDER}
             {provisionTree}
             <Form.Checkbox
               label="Delegates can amend"
               indeterminate={!resolution}
               toggle
+              disabled={!this.isOwner()}
               checked={amendmentsArePublic(resolution)}
               onChange={checkboxHandler<ResolutionData>(resolutionFref, 'amendmentsArePublic')}
             />
           </Form>
-          {this.renderAdditionalOptions()}
         </Segment>
         {amendmentsArePublic(resolution) && DELEGATES_CAN_AMEND_NOTICE}
       </React.Fragment>
     );
+  }
+
+  isSponsor(resolution?: ResolutionData) {
+    const nation = this.getNation();
+    if (nation && resolution) {
+      const proposer = resolution
+        ? resolution.proposer
+        : undefined;
+      if (nation.name === proposer) { return true; }
+    }
+    return false;
   }
 
   renderText = (resolution?: ResolutionData) => {
@@ -719,6 +770,7 @@ export default class Resolution extends React.Component<Props, State> {
         <TextArea
           value={resolution ? resolution.link : ''}
           autoHeight
+          disabled={(!this.isOwner()) && !(this.isSponsor(resolution))}
           onChange={textAreaHandler<ResolutionData>(resolutionFref, 'link')}
           attatched="top"
           rows={3}
@@ -740,13 +792,17 @@ export default class Resolution extends React.Component<Props, State> {
       />
     );
 
+    const changeName = this.isOwner() ? 
+                        fieldHandler<ResolutionData>(resolutionFref, 'name'): 
+                        (e: React.FormEvent<HTMLInputElement>) => {};
+
     return (
       <Input
         value={resolution ? resolution.name : ''}
         label={statusDropdown}
         loading={!resolution}
         labelPosition="right"
-        onChange={fieldHandler<ResolutionData>(resolutionFref, 'name')}
+        onChange={changeName}
         attatched="top"
         size="massive"
         fluid
@@ -759,28 +815,22 @@ export default class Resolution extends React.Component<Props, State> {
     const { renderAmendment, recoverResolutionFref } = this;
 
     const resolutionRef = recoverResolutionFref();
+    const nation = this.getNation();
+    let nationName: string | null = null;
+    if (nation) {
+      nationName = nation.name;
+    }
 
     return Object.keys(amendments).reverse().map(key => {
-      return renderAmendment(key, amendments[key], resolutionRef.child('amendments').child(key));
+      const data = renderAmendment(key, amendments[key], resolutionRef.child('amendments').child(key), nationName);
+      return data;
     });
-  }
-
-  renderAdditionalOptions = () => {
-    return  (
-      <Dropdown
-        text='More options'
-        className='icon'
-      >
-      <Dropdown.Menu>
-        <DeleteResolutionModal onConfirm={() => this.recoverResolutionFref().remove()} />
-      </Dropdown.Menu>
-    </Dropdown>)
   }
 
   renderAmendmentsGroup = (resolution?: ResolutionData) => {
     const { renderAmendments, handlePushAmendment } = this;
     const amendments = resolution ? resolution.amendments : undefined;
-
+    
     const adder = (
       <Card>
         {/* <Card.Content> */}
@@ -789,6 +839,7 @@ export default class Resolution extends React.Component<Props, State> {
           primary
           fluid
           basic
+          disabled={!this.canAmend()}
           onClick={handlePushAmendment}
         />
         {/* </Card.Content> */}
@@ -819,8 +870,9 @@ export default class Resolution extends React.Component<Props, State> {
 
   renderFeed = () => {
     const resolutionID: ResolutionID = this.props.match.params.resolutionID;
+    const owner = this.isOwner();
 
-    return <Files {...this.props} forResolution={resolutionID} />;
+    return <Files {...this.props} forResolution={resolutionID} isOwner={owner} />;
   }
 
   onTabChange = (event: React.MouseEvent<HTMLDivElement>, data: TabProps) => {
@@ -831,10 +883,10 @@ export default class Resolution extends React.Component<Props, State> {
 
     if (tab) {
       this.props.history
-        .push(`/committees/${committeeID}/resolutions/${resolutionID}/${tab}`);
+        .push(`${siteBase}/committees/${committeeID}/resolutions/${resolutionID}/${tab}`);
     } else {
       this.props.history
-        .push(`/committees/${committeeID}/resolutions/${resolutionID}`);
+        .push(`${siteBase}/committees/${committeeID}/resolutions/${resolutionID}`);
     }
   }
 
@@ -904,4 +956,9 @@ export default class Resolution extends React.Component<Props, State> {
       return this.renderResolution(resolution);
     }
   }
+}
+
+export function Resolution (props: Props) {
+  const own = Owner();
+  return <ResolutionPage {...props} isOwner={own}/>
 }

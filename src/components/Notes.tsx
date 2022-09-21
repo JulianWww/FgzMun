@@ -48,11 +48,11 @@ export default class Notes extends React.Component<Props, State> {
     // const trigger = <Button icon="question" size="mini" basic floated="right" />;
 
     return committee ? (
-      <Container text style={{ padding: '1em 0em' }}>
+      <Container text style={{ padding: '1em 0em', "height": "100%" }}>
         <Helmet>
           <title>{`Notes - Muncoordinated`}</title>
         </Helmet>
-        <Form>
+        <Form style={{"height": "100%"}}>
           <TextArea
             value={committee ? committee.notes : ''}
             onChange={textAreaHandler<CommitteeData>(committeeFref, 'notes')}

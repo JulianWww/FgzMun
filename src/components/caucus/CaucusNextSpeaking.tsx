@@ -16,6 +16,7 @@ interface Props {
   speakerTimer: TimerData;
   fref: firebase.database.Reference;
   autoNextSpeaker: boolean;
+  owner: boolean;
 }
 
 export function CaucusNextSpeaking(props: Props) {
@@ -105,7 +106,7 @@ export function CaucusNextSpeaking(props: Props) {
     });
   };
 
-  const { caucus } = props;
+  const { caucus, owner } = props;
   const { ticking } = props.speakerTimer;
 
   const queue = caucus ? caucus.queue : {}; 
@@ -212,6 +213,7 @@ export function CaucusNextSpeaking(props: Props) {
         queueFref={props.fref.child('queue')} 
         speaking={caucus ? caucus.speaking : undefined}
         speakerTimer={props.speakerTimer} 
+        owner={owner}
       />
     </Segment>
   );

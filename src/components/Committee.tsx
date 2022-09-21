@@ -4,7 +4,7 @@ import { RouteComponentProps } from 'react-router';
 import { Route } from 'react-router-dom';
 import { MemberData, MemberID } from './Member';
 import Caucus, { CaucusData, CaucusID, DEFAULT_CAUCUS, DEFAULT_CAUCUS_TIME_SECONDS, CaucusStatus } from './Caucus';
-import Resolution, { ResolutionData, ResolutionID, DEFAULT_RESOLUTION } from './Resolution';
+import { Resolution, ResolutionData, ResolutionID, DEFAULT_RESOLUTION } from './Resolution';
 import Admin from './Admin';
 import { Icon, Menu, SemanticICONS, Dropdown, Container, Responsive, Sidebar, Header,
   List, Input, Button, Segment } from 'semantic-ui-react';
@@ -27,13 +27,15 @@ import { CommitteeShareHint } from './ShareHint';
 import Notifications from './Notifications';
 import { putResolution } from '../actions/resolution-actions';
 import ConnectionStatus from './ConnectionStatus';
-import { membersToOptions, membersToPresentOptions } from '../utils';
+import { membersToOptions, membersToPresentOptions, isOwner } from '../utils';
 import { fieldHandler } from '../actions/handlers';
 import { CommitteeTemplate, MemberOption } from '../constants';
 import { putStrawpoll } from '../actions/strawpoll-actions';
 import Strawpoll, { DEFAULT_STRAWPOLL, StrawpollID, StrawpollData } from './Strawpoll';
 import { logClickSetupCommittee } from '../analytics';
-
+import { siteBase } from "../data";
+import { useVoterID } from "../hooks"
+ 
 export function recoverMemberOptions(committee?: CommitteeData): MemberOption[] {
   if (committee) {
     return membersToOptions(committee.members);
@@ -119,6 +121,8 @@ interface Props extends RouteComponentProps<URLParameters> {
 interface State {
   committee?: CommitteeData;
   committeeFref: firebase.database.Reference;
+  authUnsubscribe?: () => void;
+  user?: firebase.User | null,
 }
 
 export type CommitteeID = string;
@@ -235,16 +239,16 @@ interface ResponsiveContainerProps extends RouteComponentProps<URLParameters> {
 function ResponsiveNav(props: ResponsiveContainerProps) {
   const committeeID: CommitteeID = props.match.params.committeeID;
 
-  const makeMenuItem = (name: string, icon: SemanticICONS) => {
-    const destination = `/committees/${committeeID}/${name.toLowerCase()}`;
+  const makeMenuItem = (name: string, text: string) => {
+    const destination = name[0] === "/" ? `${siteBase}${name}` : `${siteBase}/committees/${committeeID}/${name.toLowerCase()}`;
 
     return (
       <Menu.Item
-        key={name}
-        name={name.toLowerCase()}
+        key={text}
+        name={text.toLowerCase()}
         active={props.location.pathname === destination}
         onClick={() => props.history.push(destination)}
-        text={name}
+        text={text}
         // icon={icon}
       />
     );
@@ -264,7 +268,8 @@ function ResponsiveNav(props: ResponsiveContainerProps) {
   }
 
   const makeMenuIcon = (name: string, icon: SemanticICONS) => {
-    const destination = `/committees/${committeeID}/${name.toLowerCase()}`;
+
+    const destination = (name[0] === "/" ? `${siteBase}${name}` : `${siteBase}/committees/${committeeID}/${name.toLowerCase()}`);
 
     return (
       <Menu.Item
@@ -278,7 +283,7 @@ function ResponsiveNav(props: ResponsiveContainerProps) {
   }
 
   const makeSubmenuItem = (id: string, name: string, description: string | undefined, type: 'caucuses' | 'resolutions' | 'strawpolls') => {
-    const destination = `/committees/${committeeID}/${type}/${id}`;
+    const destination = `${siteBase}/committees/${committeeID}/${type}/${id}`;
 
     return (
       <Dropdown.Item
@@ -295,21 +300,21 @@ function ResponsiveNav(props: ResponsiveContainerProps) {
     const ref = putCaucus(committeeID, DEFAULT_CAUCUS);
 
     props.history
-      .push(`/committees/${committeeID}/caucuses/${ref.key}`);
+      .push(`${siteBase}/committees/${committeeID}/caucuses/${ref.key}`);
   }
 
   const pushResolution = () => {
     const ref = putResolution(committeeID, DEFAULT_RESOLUTION);
 
     props.history
-      .push(`/committees/${committeeID}/resolutions/${ref.key}`);
+      .push(`${siteBase}/committees/${committeeID}/resolutions/${ref.key}`);
   }
 
   const pushStrawpoll = () => {
     const ref = putStrawpoll(committeeID, DEFAULT_STRAWPOLL);
 
     props.history
-      .push(`/committees/${committeeID}/strawpolls/${ref.key}`);
+      .push(`${siteBase}/committees/${committeeID}/strawpolls/${ref.key}`);
   }
 
   const renderMenuItems = () => {
@@ -337,14 +342,14 @@ function ResponsiveNav(props: ResponsiveContainerProps) {
         <Menu.Item
           header
           key="header"
-          onClick={() => props.history.push(`/committees/${committeeID}`)}
-          active={props.location.pathname === `/committees/${committeeID}`}
+          onClick={() => props.history.push(`${siteBase}/committees/${committeeID}`)}
+          active={props.location.pathname === `${siteBase}/committees/${committeeID}`}
         >
           {committee ? committee.name : <Loading small />}
         </Menu.Item>
-        {makeMenuItem('Setup', 'users')}
-        {makeMenuItem('Motions', 'sort numeric descending')}
-        {makeMenuItem('Unmod', 'discussions')}
+        {makeMenuItem('Setup', 'Setup')}
+        {makeMenuItem('Motions', 'Motions')}
+        {makeMenuItem('Unmod', 'Unmod')}
         <Dropdown key="caucuses" item text="Caucuses" loading={!committee}>
           <Dropdown.Menu>
             {makeSubmenuButton('New caucus', 'add', pushCaucus)}
@@ -363,10 +368,11 @@ function ResponsiveNav(props: ResponsiveContainerProps) {
             {strawpollItems}
           </Dropdown.Menu>
         </Dropdown>
-        {makeMenuItem('Notes', 'sticky note outline')}
-        {makeMenuItem('Posts', 'file outline')}
-        {makeMenuItem('Stats', 'chart bar')}
+        {makeMenuItem('Notes', 'Notes')}
+        {makeMenuItem('Posts', 'Posts')}
+        {makeMenuItem('Stats', 'Stats')}
         <Menu.Menu key="icon-submenu" position="right">
+          {makeMenuItem('/', 'Home Page')}
           {makeMenuIcon('Settings', 'settings')}
           {makeMenuIcon('Help', 'help')}
         </Menu.Menu>
@@ -404,17 +410,27 @@ export default class Committee extends React.Component<Props, State> {
 
   componentDidMount() {
     this.state.committeeFref.on('value', this.firebaseCallback);
+
+    const authUnsubscribe = firebase.auth().onAuthStateChanged(
+      this.authStateChangedCallback,
+    );
+
+    this.setState({ authUnsubscribe });
   }
 
   componentWillUnmount() {
     this.state.committeeFref.off('value', this.firebaseCallback);
+
+    if (this.state.authUnsubscribe) {
+      this.state.authUnsubscribe();
+    }
   }
 
   gotoSetup = () => {
     const { committeeID } = this.props.match.params;
 
     this.props.history
-      .push(`/committees/${committeeID}/setup`);
+      .push(`${siteBase}/committees/${committeeID}/setup`);
 
     logClickSetupCommittee();
   }
@@ -425,6 +441,7 @@ export default class Committee extends React.Component<Props, State> {
         {...this.props}
         committee={this.state.committee || DEFAULT_COMMITTEE}
         fref={this.state.committeeFref}
+        isOwner={isOwner(this.state.committee, this.state.user)}
       />
     );
   }
@@ -478,9 +495,39 @@ export default class Committee extends React.Component<Props, State> {
       </Container>
     );
   }
+  authStateChangedCallback = (user: firebase.User | null) => {
+    this.setState({ user: user });
+  }
+  renderMotions = () => {
+    const [voterID] = useVoterID();
+    const owner = isOwner(this.state.committee, this.state.user);
+    return (
+      <Motions
+        {...this.props}
+        voterID={voterID}
+        isOwner={owner}
+      />
+    );
+  }
+  renderUnmod = () => {
+    return (
+      <Unmod
+        {...this.props}
+        isOwner={isOwner(this.state.committee, this.state.user)}
+      />
+    )
+  }
+  renderFiles = () => {
+    return (
+      <Files
+        {...this.props}
+        isOwner={isOwner(this.state.committee, this.state.user)}
+      />
+    )
+  }
 
   render() {
-    const { renderAdmin, renderWelcome } = this;
+    const { renderAdmin, renderWelcome, renderMotions, renderUnmod, renderFiles } = this;
 
     return (
       <React.Fragment>
@@ -489,18 +536,18 @@ export default class Committee extends React.Component<Props, State> {
           <Container text>
             <ConnectionStatus />
           </Container>
-          <Route exact={true} path="/committees/:committeeID" render={renderWelcome} />
-          <Route exact={true} path="/committees/:committeeID/setup" render={renderAdmin} />
-          <Route exact={true} path="/committees/:committeeID/stats" component={Stats} />
-          <Route exact={true} path="/committees/:committeeID/unmod" component={Unmod} />
-          <Route exact={true} path="/committees/:committeeID/motions" component={Motions} />
-          <Route exact={true} path="/committees/:committeeID/notes" component={Notes} />
-          <Route exact={true} path="/committees/:committeeID/posts" component={Files} />
-          <Route exact={true} path="/committees/:committeeID/settings" component={Settings} />
-          <Route exact={true} path="/committees/:committeeID/help" component={Help} />
-          <Route path="/committees/:committeeID/caucuses/:caucusID" component={Caucus} />
-          <Route path="/committees/:committeeID/resolutions/:resolutionID/:tab?" component={Resolution} />
-          <Route path="/committees/:committeeID/strawpolls/:strawpollID" component={Strawpoll} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID"} render={renderWelcome} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID/setup"} render={renderAdmin} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID/stats"} component={Stats} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID/unmod"} render={renderUnmod} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID/motions"} component={renderMotions} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID/notes"} component={Notes} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID/posts"} render={renderFiles} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID/settings"} component={Settings} />
+          <Route exact={true} path={ siteBase + "/committees/:committeeID/help"} component={Help} />
+          <Route path={ siteBase + "/committees/:committeeID/caucuses/:caucusID"} component={Caucus} />
+          <Route path={ siteBase + "/committees/:committeeID/resolutions/:resolutionID/:tab?"} component={Resolution} />
+          <Route path={ siteBase + "/committees/:committeeID/strawpolls/:strawpollID"} component={Strawpoll} />
           <Footer />
         </ResponsiveNav>
       </React.Fragment>

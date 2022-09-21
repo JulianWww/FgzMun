@@ -5,6 +5,7 @@ import { CommitteeID, CommitteeData } from './Committee';
 import _ from 'lodash';
 import Loading from './Loading';
 import { logCreateAccount, logLogin } from '../analytics';
+import { siteBase } from "../data";
 
 enum Mode {
   Login = 'Login',
@@ -175,7 +176,7 @@ export class Login extends React.Component<Props, State> {
     return (
       <List.Item key={committeeID}>
         <List.Content>
-          <List.Header as="a" href={`/committees/${committeeID}`}>
+          <List.Header as="a" href={`${siteBase}/committees/${committeeID}`}>
             {committee.name}
           </List.Header>
           <List.Description>

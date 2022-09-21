@@ -12,9 +12,9 @@ import { MemberOption, COUNTRY_OPTIONS } from '../constants';
 import { ResolutionID } from './Resolution';
 import { putAmendment } from '../actions/resolution-actions';
 import { DEFAULT_AMENDMENT } from './Amendment';
-import { getCookie } from "../cookie"
 import { nameToMemberOption } from "./Member"
-import { getID } from "../utils"
+import { siteBase } from "../data"
+import { getNationData } from "../utils"
 
 const TEXT_ICON: SemanticICONS = 'align left';
 const FILE_ICON: SemanticICONS = 'file outline';
@@ -94,18 +94,17 @@ class Entry extends React.Component<EntryProps, EntryState> {
     }
   }
 
-  download = (filename: string) => () => {
-    // We should never allow a download to be triggered for post types that 
-    // don't permit downloads
-    this.recoverStorageRef()!.getDownloadURL().then((url: any) => {
-      var xhr = new XMLHttpRequest();
-      xhr.responseType = 'blob';
-      xhr.onload = (event) => {
-        const blob = xhr.response;
-        FileSaver.saveAs(blob, filename);
-      };
-      xhr.open('GET', url);
-      xhr.send();
+  download(filename: string) {
+    return (() => { 
+      this.recoverStorageRef()!.getDownloadURL().then((url: any) => {
+        const win = window.open(url, "_blank");
+        if (win) {
+          win.focus();
+        }
+        else {
+          window.location = url;
+        }
+      });
     });
   }
 
@@ -222,15 +221,20 @@ interface State {
   body: string;
   errorCode?: string;
   uploader?: MemberOption;
+  isOwner: boolean;
   filtered: MemberOption['key'][];
+}
+
+interface Hooks {
+  isOwner: boolean
 }
 
 interface Props extends RouteComponentProps<URLParameters> {
   forResolution?: ResolutionID
 }
 
-export default class Files extends React.Component<Props, State> {
-  constructor(props: Props) {
+export default class Files extends React.Component<Props & Hooks, State> {
+  constructor(props: Props & Hooks) {
     super(props);
 
     const { match } = props;
@@ -240,7 +244,8 @@ export default class Files extends React.Component<Props, State> {
       body: '',
       committeeFref: firebase.database().ref('committees')
         .child(match.params.committeeID),
-      filtered: []
+      filtered: [],
+      isOwner: this.props.isOwner
     };
   }
 
@@ -386,21 +391,7 @@ export default class Files extends React.Component<Props, State> {
   }
 
   getNation() {
-    if (this.state.committee)
-    {
-      const nation = getCookie("nation");
-      if (nation)
-      {
-        const authToken = getCookie("authToken");
-        const members = this.state.committee.members || {};
-        const id = getID(members, nation);
-        if (authToken === members[id].authToken)
-        {
-          return members[id];
-        }
-      }
-    }
-    return null;
+    return getNationData(this.state.committee);
   }
 
   setMemberFromCookie = () => {
@@ -438,6 +429,7 @@ export default class Files extends React.Component<Props, State> {
               search
               fluid
               selection
+              disabled={!this.props.isOwner}
               error={!uploader}
               onChange={this.setMember}
               options={memberOptions}
@@ -516,15 +508,13 @@ export default class Files extends React.Component<Props, State> {
       text: post.body,
     })
 
-    this.props.history.push(`/committees/${committeeID}/resolutions/${post.forResolution}/amendments`);
+    this.props.history.push(`${siteBase}/committees/${committeeID}/resolutions/${post.forResolution}/amendments`);
   }
 
   renderLinker = () => {
     const { committee, uploader, body, link } = this.state;
 
     const memberOptions = recoverMemberOptions(committee);
-
-    console.log(uploader);
 
     return (
       <Form onSubmit={this.postLink}>
@@ -551,6 +541,7 @@ export default class Files extends React.Component<Props, State> {
             value={uploader ? uploader.key : undefined}
             search
             selection
+            disabled={!this.props.isOwner}
             error={!uploader}
             onChange={this.setMember}
             options={memberOptions}
@@ -565,6 +556,12 @@ export default class Files extends React.Component<Props, State> {
         </Form.Group>
       </Form>
     );
+  }
+
+  isOwner() {
+    console.log("this is the owner")
+    console.log(this.props.isOwner);
+    return this.props.isOwner;
   }
 
   renderPoster = () => {
@@ -593,7 +590,7 @@ export default class Files extends React.Component<Props, State> {
             value={uploader ? uploader.key : undefined}
             search
             selection
-            disabled
+            disabled={!this.isOwner()}
             error={!uploader}
             onChange={this.setMember}
             options={memberOptions}

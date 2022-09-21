@@ -16,7 +16,6 @@ import { meetId } from '../utils';
 import { putCommittee } from '../actions/committee-actions';
 import { parseFlagName, Rank } from './Member';
 import { Helmet } from 'react-helmet';
-import { siteBase } from "../data";
 
 interface Props extends RouteComponentProps<URLParameters> {
 }
@@ -99,7 +98,7 @@ export default class Onboard extends React.Component<Props, State> {
       }
 
       const newCommitteeRef = putCommittee(meetId(), newCommittee)
-      this.props.history.push(`${siteBase}/committees/${newCommitteeRef.key}`);
+      this.props.history.push(`/committees/${newCommitteeRef.key}`);
       logCreateCommittee(newCommitteeRef.key ?? undefined)
 
       if (template) {
@@ -113,10 +112,8 @@ export default class Onboard extends React.Component<Props, State> {
                 .push({
                   name: member.name,
                   rank: member.rank ?? Rank.Standard,
-                  present: false,
-                  voting: false,
-                  frozen: true,
-                  authToken: ""
+                  present: true,
+                  voting: false
                 })
           );
       }

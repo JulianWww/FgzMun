@@ -8,6 +8,7 @@ import { URLParameters } from '../types';
 //import { CommitteeTemplate, TEMPLATE_TO_MEMBERS } from '../constants';
 import ConnectionStatus from './ConnectionStatus';
 import { Helmet } from 'react-helmet';
+import {siteBase} from "../data";
 
 interface Props extends RouteComponentProps<URLParameters> {
 }
@@ -55,7 +56,7 @@ export default class Join extends React.Component<Props, State> {
   }
 
   handleSubmit = () => {
-    window.location.href = '/Join/'+this.state.key;
+    window.location.href = siteBase + '/Join/'+this.state.key;
   }
 
 
@@ -82,7 +83,7 @@ export default class Join extends React.Component<Props, State> {
               disabled={!this.state.isValid}
               
             >
-              Join committee
+              Next
               <Icon name="arrow right" />
             </Form.Button>
           </Form>

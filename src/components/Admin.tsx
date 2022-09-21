@@ -13,6 +13,7 @@ import _ from 'lodash';
 import { URLParameters } from '../types';
 import { RouteComponentProps } from 'react-router';
 import { logClickGeneralSpeakersList, logCreateMember } from '../analytics';
+import { siteBase } from "../data";
 
 export const canVote = (x: MemberData) => (x.rank === Rank.Veto || x.rank === Rank.Standard);
 export const nonNGO = (x: MemberData) => (x.rank !== Rank.NGO);
@@ -156,8 +157,12 @@ export function CommitteeStats(props: { data?: CommitteeData, verbose: boolean }
   );
 }
 
-export default class Admin extends React.Component<Props, State> {
-  constructor(props: Props) {
+interface AdminHook {
+  isOwner: boolean
+}
+
+export default class Admin extends React.Component<Props & AdminHook, State> {
+  constructor(props: Props & AdminHook) {
     super(props);
 
     this.state = {
@@ -165,14 +170,19 @@ export default class Admin extends React.Component<Props, State> {
       options: [],
       rank: Rank.Standard,
       voting: false,
-      present: true,
+      present: false,
       frozen: true,
-      globalPresent: true,
+      globalPresent: false,
       globalVoting: false
     };
   }
 
+  isOwner() {
+    return this.props.isOwner;
+  }
+
   renderMemberItem = (id: MemberID, member: MemberData, fref: firebase.database.Reference) => {
+    const isOwner = this.isOwner();
     return (
       <Table.Row key={id}>
         <Table.Cell>
@@ -184,6 +194,7 @@ export default class Admin extends React.Component<Props, State> {
             search
             selection
             fluid
+            disabled={!isOwner}
             options={RANK_OPTIONS}
             onChange={dropdownHandler<MemberData>(fref, 'rank')}
             value={member.rank}
@@ -193,6 +204,7 @@ export default class Admin extends React.Component<Props, State> {
           <Checkbox 
             className="members__checkbox--toggle-present"
             toggle 
+            disabled={!isOwner}
             checked={member.present} 
             onChange={checkboxHandler<MemberData>(fref, 'present')} 
           />
@@ -200,6 +212,7 @@ export default class Admin extends React.Component<Props, State> {
         <Table.Cell collapsing>
           <Checkbox 
             toggle 
+            disabled={!isOwner}
             checked={member.voting} 
             onChange={checkboxHandler<MemberData>(fref, 'voting')} 
           />
@@ -207,6 +220,7 @@ export default class Admin extends React.Component<Props, State> {
         <Table.Cell collapsing>
           <Checkbox 
             toggle 
+            disabled={!isOwner}
             checked={member.frozen} 
             onChange={checkboxHandler<MemberData>(fref, 'frozen')} 
           />
@@ -217,6 +231,7 @@ export default class Admin extends React.Component<Props, State> {
             icon="trash"
             negative
             basic
+            disabled={!isOwner}
             onClick={() => fref.remove()}
           />
         </Table.Cell>
@@ -292,7 +307,7 @@ export default class Admin extends React.Component<Props, State> {
     const { committeeID } = this.props.match.params;
 
     this.props.history
-      .push(`/committees/${committeeID}/caucuses/gsl`);
+      .push(siteBase+`/committees/${committeeID}/caucuses/gsl`);
 
     logClickGeneralSpeakersList();
   }
@@ -300,6 +315,7 @@ export default class Admin extends React.Component<Props, State> {
   renderAdder() {
     const { handleAdd, setMember, setRank, setPresent, setVoting, setFrozen } = this;
     const { present: newMemberPresent, voting: newMemberVoting, frozen: newMemberFrozen, options: newOptions, member: newMember } = this.state;
+    const isOwner = this.isOwner();
 
     return (
       <Table.Row>
@@ -312,6 +328,7 @@ export default class Admin extends React.Component<Props, State> {
             selection
             fluid
             allowAdditions
+            disabled={!isOwner}
             error={!this.canPush()}
             options={[...newOptions, ...COUNTRY_OPTIONS]}
             onAddItem={handleAdd}
@@ -325,6 +342,7 @@ export default class Admin extends React.Component<Props, State> {
             search
             selection
             fluid
+            disabled={!isOwner}
             options={RANK_OPTIONS}
             onChange={setRank}
             value={this.state.rank}
@@ -334,6 +352,7 @@ export default class Admin extends React.Component<Props, State> {
           <Checkbox 
             className="adder__checkbox--toggle-present"
             toggle 
+            disabled={!isOwner}
             checked={newMemberPresent} 
             onChange={setPresent} 
           />
@@ -342,6 +361,7 @@ export default class Admin extends React.Component<Props, State> {
           <Checkbox 
             className="adder__checkbox--toggle-voting"
             toggle 
+            disabled={!isOwner}
             checked={newMemberVoting} 
             onChange={setVoting} 
           />
@@ -350,6 +370,7 @@ export default class Admin extends React.Component<Props, State> {
           <Checkbox 
             className="adder__checkbox--toggle-frozen"
             toggle 
+            disabled={!isOwner}
             checked={newMemberFrozen} 
             onChange={setFrozen} 
           />
@@ -360,7 +381,7 @@ export default class Admin extends React.Component<Props, State> {
             icon="plus"
             primary
             basic
-            disabled={!this.canPush()}
+            disabled={!this.canPush() || !isOwner}
             onClick={this.pushMember}
           />
         </Table.HeaderCell>
@@ -393,6 +414,7 @@ export default class Admin extends React.Component<Props, State> {
     const memberItems = Object.keys(members).map(id =>
       this.renderMemberItem(id, members[id], props.fref.child('members').child(id))
     );
+    const isOwner = this.isOwner();
 
     return (
       <>
@@ -405,7 +427,7 @@ export default class Admin extends React.Component<Props, State> {
                 <Checkbox
                   style={{"marginTop": "5px", "marginBottom": "-5px"}}
                   toggle 
-                  //checked={this.state.globalPresent}
+                  disabled={!isOwner}
                   onChange={this.setGlobalStatus("present")}
                 />
               </Table.HeaderCell>
@@ -413,6 +435,7 @@ export default class Admin extends React.Component<Props, State> {
                 <Checkbox
                   style={{"marginTop": "5px", "marginBottom": "-5px"}}
                   toggle 
+                  disabled={!isOwner}
                   onChange={this.setGlobalStatus("voting")}
                 />
               </Table.HeaderCell>
@@ -420,6 +443,7 @@ export default class Admin extends React.Component<Props, State> {
                 <Checkbox
                   style={{"marginTop": "5px", "marginBottom": "-5px"}}
                   toggle 
+                  disabled={!isOwner}
                   onChange={this.setGlobalStatus("frozen")}
                 />
               </Table.HeaderCell>

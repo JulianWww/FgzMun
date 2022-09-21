@@ -10,13 +10,17 @@ import { Unit } from './TimerSetter';
 interface Props extends RouteComponentProps<URLParameters> {
 }
 
+interface Hooks {
+  isOwner: boolean;
+}
+
 interface State {
   timer?: TimerData;
   committeeFref: firebase.database.Reference;
 }
 
-export default class Unmod extends React.Component<Props, State> {
-  constructor(props: Props) {
+export default class Unmod extends React.Component<Props & Hooks, State> {
+  constructor(props: Props & Hooks) {
     super(props);
 
     const { match } = props;
@@ -30,6 +34,7 @@ export default class Unmod extends React.Component<Props, State> {
 
   render() {
     const { committeeFref } = this.state;
+    const { isOwner } = this.props
 
     return (
       <Container text style={{ padding: '1em 0em' }}>
@@ -42,6 +47,7 @@ export default class Unmod extends React.Component<Props, State> {
           onChange={(x: TimerData) => x} 
           defaultDuration={10}
           defaultUnit={Unit.Minutes}
+          isOwner={isOwner}
         />
       </Container>
     );

@@ -26,9 +26,14 @@ interface Props {
   error?: boolean;
   placeholder?: string;
   loading?: boolean;
+  disabled?: boolean;
 }
 
 export class TimerSetter extends React.Component<Props, {}> {
+  constructor(props: Props) {
+    super(props);
+    console.log(props);
+  }
   
   isInvalid = () => {
     const { durationValue: n } = this.props;
@@ -57,6 +62,7 @@ export class TimerSetter extends React.Component<Props, {}> {
         fluid
         error={isInvalid() || props.error}
         label={props.label}
+        disabled={props.disabled}
       >
         {/* <input style={{ 'text-align': 'right' }} /> */}
         <input />
@@ -67,9 +73,10 @@ export class TimerSetter extends React.Component<Props, {}> {
           options={UNIT_OPTIONS} 
           compact 
           button 
+          disabled={props.disabled}
           onChange={props.onUnitChange} 
         />
-        {props.onSet && (<Button onClick={handleOnSet}>Set</Button>)}
+        {props.onSet && (<Button onClick={handleOnSet} disabled={props.disabled}>Set</Button>)}
       </Form.Input>
     );
   }

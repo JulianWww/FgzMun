@@ -105,8 +105,32 @@ export function memberDropdownHandler<T>
     fref.child(field.toString()).set(memberOptions.filter(c => c.value === data.value)[0].text);
 }
 
+function getMemberDataFilter(memberOptions: MemberOption[], data: any){
+  return memberOptions.filter(c => c.value === data)[0].text
+}
+
+function getMemberOptionsArray(memberOptions: MemberOption[], data: string[]){
+  var out: string[] = [];
+  for (let element of data){
+    out.push(getMemberDataFilter(memberOptions, element));
+  }
+  return out;
+}
+
 export function stateMemberDropdownHandler<P, S>
   (comp: React.Component<P, S>, field: keyof S, target: string, memberOptions: MemberOption[]) {
-  return (event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) =>
+  return (event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
+    console.log(data);
+    console.log(memberOptions)
     lens(comp, field, target, memberOptions.filter(c => c.value === data.value)[0].text);
+  }
+}
+
+export function stateMemberDropdownHandlerMultiple<P, S>
+  (comp: React.Component<P, S>, field: keyof S, target: string, memberOptions: MemberOption[]) {
+  return (event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
+    console.log(data);
+    console.log(memberOptions)
+    lens(comp, field, target, getMemberOptionsArray(memberOptions, data.value as string[]));
+  }
 }

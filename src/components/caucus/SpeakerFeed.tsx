@@ -35,14 +35,16 @@ const StanceIcon = (props: { stance: Stance }) => {
   }
 };
 
-export class SpeakerFeedEntry extends React.PureComponent<{
+interface Props {  
   data?: SpeakerEvent,
   speaking?: SpeakerEvent,
   fref: firebase.database.Reference,
   speakerTimer: TimerData,
-  draggableProvided?: DraggableProvided
-}> {
+  draggableProvided?: DraggableProvided,
+  owner: boolean,
+}
 
+export class SpeakerFeedEntry extends React.PureComponent<Props> {
   yieldHandler = () => {
     const { fref, data, speakerTimer, speaking } = this.props;
 
@@ -67,12 +69,13 @@ export class SpeakerFeedEntry extends React.PureComponent<{
       yielding: true,
       timerResetSeconds: 0 // this shouldn't ever be used when yielding
     };
+    console.log(lifecycle);
 
     runLifecycle({ ...lifecycle, ...queueHeadDetails });
   };
 
   renderContent() {
-    const { data, speaking, fref } = this.props;
+    const { data, speaking, fref, owner } = this.props;
 
     return (
       <Feed.Content>
@@ -88,10 +91,10 @@ export class SpeakerFeedEntry extends React.PureComponent<{
             {data && <StanceIcon stance={data.stance} />}
             {data ? data.stance : ''}
           </Feed.Like>
-          {data && <Label size="mini" as="a" onClick={() => fref.remove()}>
+          {data && owner && <Label size="mini" as="a" onClick={() => fref.remove()}>
             Remove
           </Label>}
-          {data && speaking && (<Label size="mini" as="a" onClick={this.yieldHandler}>
+          {data && speaking && owner && (<Label size="mini" as="a" onClick={this.yieldHandler}>
             Yield
           </Label>)}
         </Feed.Meta>
@@ -130,9 +133,10 @@ export const SpeakerFeed = (props: {
   data?: Record<string, SpeakerEvent>,
   queueFref: firebase.database.Reference,
   speaking?: SpeakerEvent,
-  speakerTimer: TimerData
+  speakerTimer: TimerData,
+  owner: boolean,
 }) => {
-  const { data, queueFref, speaking, speakerTimer } = props;
+  const { data, queueFref, speaking, speakerTimer, owner } = props;
   const [ user  ] = useAuthState(firebase.auth());
 
   const events = data || {};
@@ -148,6 +152,7 @@ export const SpeakerFeed = (props: {
             fref={queueFref.child(key)}
             speaking={speaking}
             speakerTimer={speakerTimer}
+            owner={owner}
           />
         }
       </Draggable>

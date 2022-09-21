@@ -3,26 +3,71 @@ import {
   Button,
   Container,
   Grid,
-  Header,
+  Header, Popup,
   Icon,
   Image,
   List,
   Menu,
   Responsive,
   Segment,
-  Statistic,
   Sidebar,
   Visibility,
 } from 'semantic-ui-react';
 import { logClickJoinACommitteeButton, logClickCreateACommitteeButton, logClickLogInButton, logClickSignupButton } from '../analytics';
-import Loading from './Loading';
-import { ShareCapabilities } from './ShareHint';
+import { siteBase } from "../data";
+
+const REPO_LINK = 'https://github.com/JulianWww/Muncoordinated-2';
+export const footer = (
+  <Segment inverted vertical style={{ padding: '5em 0em' }}>
+    <Container>
+      <Grid divided inverted stackable>
+        <Grid.Row>
+          <Grid.Column width={3}>
+            <Header inverted as="h4" content="About" />
+            <List link inverted>
+              <List.Item as="a" href={REPO_LINK}>Source</List.Item>
+              <List.Item
+                as="a"
+                href="https://github.com/JulianWww/Muncoordinated-2/blob/master/LICENSE"
+              >
+                License
+              </List.Item>
+              {/* <List.Item as="a">Contact Us</List.Item> TODO */}
+            </List>
+          </Grid.Column>
+          <Grid.Column width={3}>
+            <Header inverted as="h4" content="Services" />
+            <List link inverted>
+              <List.Item as="a" href="https://github.com/JulianWww/Muncoordinated-2/issues">Support</List.Item>
+              <List.Item as="a" href="https://www.helpmymun.com/">MUN Resources</List.Item>
+              {/* <List.Item as="a">FAQ</List.Item> TODO*/}
+            </List>
+          </Grid.Column>
+          <Grid.Column width={6}>
+            <Header as="h4" inverted>Info</Header>
+            <p>Made with <span role="img" aria-label="love">💖</span> by <a href="https://github.com/MaxwellBo">Max Bo</a>, 
+            with assistance from the <a href="https://www.facebook.com/UQUNSA/">UQ United Nations Student Association</a> and 
+            modified by <a href="https://github.com/JulianWww">JulianWww</a>
+            </p>
+            <p>Copyright © 2022</p>
+          </Grid.Column>
+          <Grid.Column width={3}>
+            <Header as="h4" inverted>Contact</Header>
+            <div>Mun group:</div>
+            <p style={{textIndent: "10px"}}>mun@fgz.ch</p>
+
+            <div>Admin:</div>
+            <p style={{textIndent: "10px"}}>Jwandhoven@gmail.com</p>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+    </Container>
+  </Segment>
+)
 
 interface HomepageHeadingProps {
   mobile: boolean;
 }
-
-const REPO_LINK = 'https://github.com/MaxwellBo/Muncoordinated-2';
 
 /* eslint-disable react/no-multi-comp */
 /* Heads up! HomepageHeading uses inline styling, however it's not the best practice. Use CSS or styled components for
@@ -32,7 +77,7 @@ const HomepageHeading = ({ mobile }: HomepageHeadingProps) => (
   <Container text>
     <Header
       as="h1"
-      content="Muncoordinated"
+      content="FGZ Model United Nations"
       inverted
       style={{
         fontSize: mobile ? '2em' : '4em',
@@ -43,7 +88,7 @@ const HomepageHeading = ({ mobile }: HomepageHeadingProps) => (
     />
     <Header
       as="h2"
-      content="The collaborative browser-based Model UN committee management app"
+      content=""
       inverted
       style={{
         fontSize: mobile ? '1.5em' : '1.7em',
@@ -52,15 +97,15 @@ const HomepageHeading = ({ mobile }: HomepageHeadingProps) => (
       }}
     />
     <br />
-    <Button as="a" primary size="huge" href="/onboard" onClick={logClickCreateACommitteeButton}>
+    <Button as="a" primary size="huge" href={ siteBase + "/onboard"} onClick={logClickCreateACommitteeButton}>
       Create a committee
       <Icon name="arrow right" />
     </Button>
-    <Button as="a" primary size="huge" href="/join" onClick={logClickJoinACommitteeButton}>
+    <Button as="a" primary size="huge" href={ siteBase + "/join"} onClick={logClickJoinACommitteeButton}>
       Join a committee
       <Icon name="arrow right" />
     </Button><br />
-    <Button as="a" primary size="huge" href="/StrawPoll" style={{"marginTop": "5px"}}>
+    <Button as="a" primary size="huge" href={ siteBase + "/StrawPoll"} style={{"marginTop": "5px"}}>
       Vote on strawpoll
       <Icon name="arrow right" />
     </Button>
@@ -70,10 +115,15 @@ const HomepageHeading = ({ mobile }: HomepageHeadingProps) => (
 
 interface DesktopContainerProps {
   children?: React.ReactNode;
+  Heading: (({ mobile }: HomepageHeadingProps) => JSX.Element);
 }
 
 interface DesktopContainerState {
   fixed: boolean;
+}
+
+function path() {
+  return window.location.pathname;
 }
 
 /* Heads up!
@@ -81,7 +131,7 @@ interface DesktopContainerState {
  * It can be more complicated, but you can create really flexible markup.
  */
 
-class DesktopContainer extends React.Component<DesktopContainerProps, DesktopContainerState> {
+export class DesktopContainer extends React.Component<DesktopContainerProps, DesktopContainerState> {
   constructor(props: DesktopContainerProps) {
     super(props);
 
@@ -101,6 +151,8 @@ class DesktopContainer extends React.Component<DesktopContainerProps, DesktopCon
   render() {
     const { children } = this.props;
     const { fixed } = this.state;
+    const _path = path();
+    console.log(_path);
 
     // Semantic-UI-React/src/addons/Responsive/Responsive.js
     return (
@@ -116,18 +168,49 @@ class DesktopContainer extends React.Component<DesktopContainerProps, DesktopCon
               size="large"
             >
               <Container>
-                <Menu.Item as="a" active>Home</Menu.Item>
+                <Menu.Item 
+                  as="a" 
+                  href={ siteBase + "/"} 
+                  active={_path === siteBase + "/"}
+                >
+                  Home
+                </Menu.Item>
+                <Popup trigger={
+                  <Menu.Item 
+                    as="a" 
+                    href={ siteBase + "/RoP"} 
+                    active={_path === siteBase + "/RoP"}
+                  >
+                    RoP
+                  </Menu.Item>
+                }>
+                  Rules of Procedure
+                </Popup>
+                <Menu.Item 
+                  as="a" 
+                  href={ siteBase + "/team"} 
+                  active={_path === siteBase + "/team"}
+                >
+                  Team
+                </Menu.Item>
+                <Menu.Item 
+                  as="a" 
+                  href={ siteBase + "/events"} 
+                  active={_path === siteBase + "/events"}
+                >
+                  Events
+                </Menu.Item>
                 <Menu.Item position="right">
-                  <Button as="a" href="/onboard" inverted={!fixed} onClick={logClickLogInButton}>
+                  <Button as="a" href={ siteBase + "/onboard"} inverted={!fixed} onClick={logClickLogInButton}>
                     Log in
                   </Button>
-                  <Button as="a" href="/onboard" inverted={!fixed} primary={fixed} style={{ marginLeft: '0.5em' }} onClick={logClickSignupButton}>
+                  <Button as="a" href={ siteBase + "/onboard"} inverted={!fixed} primary={fixed} style={{ marginLeft: '0.5em' }} onClick={logClickSignupButton}>
                     Sign up
                   </Button>
                 </Menu.Item>
               </Container>
             </Menu>
-            <HomepageHeading mobile={false} />
+            <this.props.Heading mobile={false} />
           </Segment>
         </Visibility>
 
@@ -139,13 +222,14 @@ class DesktopContainer extends React.Component<DesktopContainerProps, DesktopCon
 
 interface MobileContainerProps {
   children?: React.ReactNode;
+  Heading: (({ mobile }: HomepageHeadingProps) => JSX.Element);
 }
 
 interface MobileContainerState {
   sidebarOpened: boolean;
 }
 
-class MobileContainer extends React.Component<MobileContainerProps, MobileContainerState> {
+export class MobileContainer extends React.Component<MobileContainerProps, MobileContainerState> {
   constructor(props: MobileContainerProps) {
     super(props);
 
@@ -187,12 +271,14 @@ class MobileContainer extends React.Component<MobileContainerProps, MobileContai
                     <Icon name="sidebar" />
                   </Menu.Item>
                   <Menu.Item position="right">
-                    <Button as="a" inverted href="/onboard" >Log in</Button>
-                    <Button as="a" inverted href="/onboard" style={{ marginLeft: '0.5em' }}>Sign Up</Button>
+                    <Button as="a" inverted href={ siteBase + "/onboard"} >Log in</Button>
+                    <Button as="a" inverted href={ siteBase + "/onboard"} style={{ marginLeft: '0.5em' }}>Sign Up</Button>
+                    <Button as="a" inverted href={ siteBase + "/RoP"} style={{ marginLeft: '0.5em' }}>Rules</Button>
+                    <Button as="a" inverted href={ siteBase + "/team"} style={{ marginLeft: '0.5em' }}>Team</Button>
                   </Menu.Item>
                 </Menu>
               </Container>
-              <HomepageHeading mobile={true} />
+              <this.props.Heading mobile={true} />
             </Segment>
 
             {children}
@@ -209,8 +295,8 @@ interface ResponsiveContainerProps {
 
 const ResponsiveContainer = ({ children }: ResponsiveContainerProps) => (
   <React.Fragment>
-    <DesktopContainer>{children}</DesktopContainer>
-    <MobileContainer>{children}</MobileContainer>
+    <DesktopContainer children={children} Heading={HomepageHeading}></DesktopContainer>
+    <MobileContainer children={children} Heading={HomepageHeading}></MobileContainer>
   </React.Fragment>
 );
 
@@ -223,79 +309,33 @@ export default class Homepage extends React.Component<{}, {
     this.state = {};
   }
 
-  renderStatistics() {
-    return (
-      <Statistic.Group textAlign="center">
-        <Statistic>
-          <Statistic.Value>{this.state.committeeNo || <Loading small />}</Statistic.Value>
-          <Statistic.Label>Committees created</Statistic.Label>
-        </Statistic>
-        <Statistic>
-          <Statistic.Value>{this.state.delegateNo || <Loading small />}</Statistic.Value>
-          <Statistic.Label>Delegates participating</Statistic.Label>
-        </Statistic>
-      </Statistic.Group>
-    );
-  }
-
   render() {
     return (
       <ResponsiveContainer>
         <Segment style={{ padding: '3em 0em' }} vertical>
           <Grid container stackable verticalAlign="middle">
             <Grid.Row>
-              <Grid.Column width={8}>
-                <Header as="h3" style={{ fontSize: '2em' }}>Collaborative</Header>
-                <p style={{ fontSize: '1.33em' }}>
-                  Using a shareable link delegates can: <br />
-                  <ShareCapabilities />
-                </p>
-                <p style={{ fontSize: '1.33em' }}>
-                  Everyone will see all updates in real-time, without needing to refresh the page. It's like Google Docs, but for MUN.
-                </p>
-                <p style={{ fontSize: '1.33em' }}>
-                 For virtual MUNs, we recommend pairing Muncoordinated with <a href="https://discord.com/">Discord</a>, which allows you to speak, pass notes, &amp; share files and links.
-                </p>
-                <p style={{ fontSize: '1.33em' }}>
-                  If you've got a big committee, multiple directors can manage it at the same time, using the same account.
-                </p>
-                <Header as="h3" style={{ fontSize: '2em' }}>Backed up to the cloud</Header>
-                <p style={{ fontSize: '1.33em' }}>
-                  You won't have to worry about data loss ever again. All committee activity is automatically saved to the server, 
-                  so you can start sessions with all data available from the day before.
-                </p>
-              </Grid.Column>
               <Grid.Column floated="right" width={8}>
                 <Image
-                  bordered
                   rounded
                   size="massive"
-                  src="/promo.png"
+                  src={ "https://fgzmun.ch/wp-content/uploads/2020/01/image001.png" }
                 />
+              </Grid.Column>
+              <Grid.Column width={8}>
+                <Header as="h3" style={{ fontSize: '2em' }}>Model United Nations</Header>
+                <p style={{ fontSize: '1.33em' }}>
+                Model United Nations (MUN) is a global extracurricular activity at the high school and university level. It is a simulation of the proceedings of the UN organization. Model UN originated in the United States but spread around the world in the mid 1990s due to efforts by US universities.<br/>
+                Students convene at conferences, organized by universities or large high schools, and represent chosen member-countries of the United Nations. They simulate the activities of a UN body, so-called committees, by discussing important international issues. Beforehand, they research the country they represent, their committee’s topics, and together they try to ﬁnd a sensible solution from the viewpoint of the country they are representing. For a few days, students become delegates of foreign countries and try to work together on complex issues.<br/>
+                Model United Nations offers a great opportunity for students of all ages. They study current international issues, learn how to debate according to formal debate rules and try to come up with solutions to complex issues. At conferences, delegates have to give speeches in support of their solution, they argue with each other and learn how to use rhetoric and persuasion to advance their goals. They get to know the different perspectives of different countries and learn how to bargain and compromise. They make friends from different countries and cultures and many of these friendships are kept well past the end of the conference.
+                </p>
               </Grid.Column>
             </Grid.Row>
             <Grid.Row>
               <Grid.Column width={8}>
-                <Header as="h3" style={{ fontSize: '2em' }}>A comprehensive feature set</Header>
-                <div style={{ fontSize: '1.33em' }}>
-                  Muncoordinated supports: <br />
-                  <List as="ul">
-                    <List.Item as="li">Moderated and unmoderated caucuses</List.Item>
-                    <List.Item as="li">Resolutions and amendments</List.Item>
-                    <List.Item as="li">Motions</List.Item>
-                    <List.Item as="li">Roll-call voting</List.Item>
-                    <List.Item as="li">Custom delegations</List.Item>
-                    <List.Item as="li">Strawpolls</List.Item>
-                    <List.Item as="li">File uploads</List.Item>
-                    <List.Item as="li">Delegate performance statistics</List.Item>
-                  </List>
-                </div>
-                <Header as="h3" style={{ fontSize: '2em' }}>Free and open-source</Header>
+                <Header as="h3" style={{ fontSize: '2em' }}>The Model United Nations Club at FGZ</Header>
                 <p style={{ fontSize: '1.33em' }}>
-                  All of Muncoordinated's features are available for free, not locked behind paywalls.
-                </p>
-                <p style={{ fontSize: '1.33em' }}>
-                  It's also <a href="https://github.com/MaxwellBo/Muncoordinated-2">open-source</a>, so you're free to customize it to your needs and liking.
+                The FGZ Model United Nations Club is the ﬁrst and only student-run extracurricular organization at Freies Gynmasium Zürich and one of only a few Model UN Clubs at the high school level. The Club was founded in 2018 and attended its ﬁrst conference, Paris International Model United Nations (PIMUN), in the same year. At PIMUN, one of Europe’s largest and most prestigious conferences, our delegates were among the youngest and competed with mostly university students. And yet, despite this „David vs. Goliath“ setting, one of our delegates won Best Delegate at his conference and one received an Honorable Mention. The conference was a success. We hope to attend many more conferences and repeat the success of this ﬁrst one.
                 </p>
               </Grid.Column>
               <Grid.Column floated="right" width={8}>
@@ -303,164 +343,40 @@ export default class Homepage extends React.Component<{}, {
                   centered
                   bordered
                   rounded
-                  size="medium"
-                  src="/mobile6.png"
+                  fluid
+                  size="large"
+                  src={ "https://fgzmun.ch/wp-content/uploads/2020/01/Unbenannt.png" }
                 />
               </Grid.Column>
             </Grid.Row>
-            {/* <Grid.Row>
-              <Grid.Column textAlign="center">
-                <Button size="huge">Check Them Out</Button>
-              </Grid.Column>
-            </Grid.Row> */}
-          </Grid>
-        </Segment>
-        {/* <Divider
-          as="h4"
-          className="header"
-          horizontal
-          style={{ margin: '3em 0em', textTransform: 'uppercase' }}
-        >
-          Conferences using Muncoordinated
-        </Divider> */}
-        {/* <Segment style={{ padding: '0em' }} vertical>
-          <Grid celled="internally" columns="equal" stackable>
-            <Grid.Row textAlign="center">
-              <Grid.Column style={{ paddingBottom: '5em', paddingTop: '5em' }}>
-                <Header as="h3" style={{ fontSize: '2em' }}>
-                  <a href="https://www.facebook.com/SYDMUN2018/">SydMUN 2018</a>
-                </Header>
-                <Image 
-                  centered 
-                  size="small" 
-                  rounded 
-                  src="/sydmun2018.png" 
-                />
-              </Grid.Column>
-              <Grid.Column style={{ paddingBottom: '5em', paddingTop: '5em' }}>
-                <Header as="h3" style={{ fontSize: '2em' }}>
-                  <a href="https://brismun18.com/">Brismun 2018</a>
-                </Header>
-                <Image 
-                  centered 
-                  size="small" 
-                  rounded 
-                  src="/brizmun2018.jpg" 
-                />
-              </Grid.Column>
-              <Grid.Column style={{ paddingBottom: '5em', paddingTop: '5em' }}>
-                <Header as="h3" style={{ fontSize: '2em' }}>
-                <a href="https://www.facebook.com/melbmun">MelbMUN 2018</a>
-                </Header>
-                <Image 
-                  centered 
-                  size="small" 
-                  rounded 
-                  src="/melbmun2018.png" 
-                />
+            <Grid.Row>
+              <Grid.Column>
+                <Header as="h3" style={{ fontSize: '2em' }}>Our Mission</Header>
+                <p style={{ fontSize: '1.33em' }}>
+                The FGZ MUN Club was founded to prepare for and attend Model UN conferences in Europe. Its purpose is to incentivize the education of students at FGZ on international issues which are usually left out of the standard curriculum. The preparation for conferences teaches students how to research complex topics, write position papers and how to manage your time effectively. Students study foreign countries in depth and learn to understand their perspective. Model UN conferences teach public speaking, writing, debating and networking. Foremost, however, is the understanding of different viewpoints and the ability to ﬁnd compromise and common goals in complex and often diverging situations. In addition, students practice their English or French in a challenging real-world setting. It gives students an opportunity to broaden their perspectives beyond normal school days and meet new people from different countries and cultures. Students gain a new perspective on international issues and begin to understand their individual position in broader, more global context. Our mission is to offer FGZ students an opportunity to educate themselves, practice valuable skills, meet and engage with people of different cultures to solve complex issues in order to strengthen and broaden the horizon of the entire FGZ student body.
+                </p>
               </Grid.Column>
             </Grid.Row>
-            <Grid.Row textAlign="center">
-              <Grid.Column style={{ paddingBottom: '5em', paddingTop: '5em' }}>
-                <Header as="h3" style={{ fontSize: '2em' }}>
-                <a href="https://www.facebook.com/amunc/">AMUNC 2018</a>
-                </Header>
-                <Image 
-                  centered 
-                  size="small" 
-                  rounded 
-                  src="/amunc2018.jpg" 
-                />
+            <Grid.Row>
+              <Grid.Column>
+              <Header as="h3" style={{ fontSize: '2em' }}>Joining</Header>
+                <p style={{ fontSize: '1.33em', color: "red"}}>
+                  Get Marketing to write this text. Thats not my job. JW
+                </p>
               </Grid.Column>
-              <Grid.Column style={{ paddingBottom: '5em', paddingTop: '5em' }}>
-                <Header as="h3" style={{ fontSize: '2em' }}>
-                <a href="https://www.facebook.com/NationalCapitalMUN/">NCMUN 2018</a>
-                </Header>
-                <Image 
-                  centered 
-                  size="small" 
-                  rounded 
-                  src="/ncmun2018.jpg" 
-                />
-              </Grid.Column>
-              <Grid.Column style={{ paddingBottom: '5em', paddingTop: '5em' }}>
-                <Header as="h3" style={{ fontSize: '2em' }}>
-                <a href="https://www.facebook.com/VicMUNconf/">VicMUN 2019</a>
-                </Header>
-                <Image 
-                  centered 
-                  size="small" 
-                  rounded 
-                  src="/vicmun2019.png" 
-                />
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column>
+              <Header as="h3" style={{ fontSize: '2em' }}>Support</Header>
+                <p style={{ fontSize: '1.33em' }}>
+                The FGZ MUN Club was founded to prepare for and attend Model UN conferences in Europe. Its purpose is to incentivize the education of students at FGZ on international issues which are usually left out of the standard curriculum. The preparation for conferences teaches students how to research complex topics, write position papers and how to manage your time effectively. Students study foreign countries in depth and learn to understand their perspective. Model UN conferences teach public speaking, writing, debating and networking. Foremost, however, is the understanding of different viewpoints and the ability to ﬁnd compromise and common goals in complex and often diverging situations. In addition, students practice their English or French in a challenging real-world setting. It gives students an opportunity to broaden their perspectives beyond normal school days and meet new people from different countries and cultures. Students gain a new perspective on international issues and begin to understand their individual position in broader, more global context. Our mission is to offer FGZ students an opportunity to educate themselves, practice valuable skills, meet and engage with people of different cultures to solve complex issues in order to strengthen and broaden the horizon of the entire FGZ student body.
+                </p>
               </Grid.Column>
             </Grid.Row>
           </Grid>
-        </Segment> */}
-        {/* <Segment style={{ padding: '8em 0em' }} vertical>
-          <Container text>
-            <Header as="h3" style={{ fontSize: '2em' }}>Breaking The Grid, Grabs Your Attention</Header>
-            <p style={{ fontSize: '1.33em' }}>
-              Instead of focusing on content creation and hard work, we have learned how to master the art of doing
-              nothing by providing massive amounts of whitespace and generic content that can seem massive, monolithic
-              and worth your attention.
-          </p>
-            <Button as="a" size="large">Read More</Button>
-            <Divider
-              as="h4"
-              className="header"
-              horizontal
-              style={{ margin: '3em 0em', textTransform: 'uppercase' }}
-            >
-              Case Studies
-            </Divider>
-            <Header as="h3" style={{ fontSize: '2em' }}>Did We Tell You About Our Bananas?</Header>
-            <p style={{ fontSize: '1.33em' }}>
-              Yes I know you probably disregarded the earlier boasts as non-sequitur filler content, but it's really
-              true.
-              It took years of gene splicing and combinatory DNA research, but our bananas can really dance.
-          </p>
-            <Button as="a" size="large">I'm Still Quite Interested</Button>
-          </Container>
-        </Segment> */}
-        <Segment inverted vertical style={{ padding: '5em 0em' }}>
-          <Container>
-            <Grid divided inverted stackable>
-              <Grid.Row>
-                <Grid.Column width={3}>
-                  <Header inverted as="h4" content="About" />
-                  <List link inverted>
-                    <List.Item as="a" href={REPO_LINK}>Source</List.Item>
-                    <List.Item
-                      as="a"
-                      href="https://github.com/MaxwellBo/Muncoordinated-2/blob/master/LICENSE"
-                    >
-                      License
-                    </List.Item>
-                    {/* <List.Item as="a">Contact Us</List.Item> TODO */}
-                  </List>
-                </Grid.Column>
-                <Grid.Column width={3}>
-                  <Header inverted as="h4" content="Services" />
-                  <List link inverted>
-                    <List.Item as="a" href="https://github.com/MaxwellBo/Muncoordinated-2/discussions">Forum</List.Item>
-                    <List.Item as="a" href="https://github.com/MaxwellBo/Muncoordinated-2/issues">Support</List.Item>
-                    <List.Item as="a" href="https://www.helpmymun.com/">MUN Resources</List.Item>
-                    {/* <List.Item as="a">FAQ</List.Item> TODO*/}
-                  </List>
-                </Grid.Column>
-                <Grid.Column width={7}>
-                  <Header as="h4" inverted>Info</Header>
-                  <p>Made with <span role="img" aria-label="love">💖</span> by <a href="https://github.com/MaxwellBo">Max Bo</a>, 
-                  with assistance from the <a href="https://www.facebook.com/UQUNSA/">UQ United Nations Student Association</a>
-                  </p>
-                  <p>Copyright © 2022</p>
-                </Grid.Column>
-              </Grid.Row>
-            </Grid>
-          </Container>
         </Segment>
+        {footer}
       </ResponsiveContainer>
     );
   }
-}
+};

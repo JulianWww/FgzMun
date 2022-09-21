@@ -33,7 +33,6 @@
           "$sid": {
             "options": {
               "$oid": {
-                ".write": "newData.exists() && data.parent().parent().child('optionsArePublic').val() === true",
                 "votes": {
                   "$vid": {
                     ".write": true

@@ -35,7 +35,7 @@
     "netlify-plugin-cypress": "^1.4.1"
   },
   "scripts": {
-    "start": "HTTPS=true react-scripts start",
+    "start": "HTTPS=false react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -52,5 +52,6 @@
   "main": "index.js",
   "repository": "https://github.com/JulianWww/Muncoordinated-2",
   "author": "JulianWww <julian.wandhoven@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "homepage": "https://wandhoven.ddns.net/mun"
 }
