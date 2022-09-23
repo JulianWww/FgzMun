@@ -11,6 +11,10 @@
   margin-left: 20px;
 }
 
+.thirdwidth {
+  width: 33% !important
+}
+
 .visible {
   display: block !important;
 }

@@ -195,6 +195,13 @@ export class DesktopContainer extends React.Component<DesktopContainerProps, Des
                 </Menu.Item>
                 <Menu.Item 
                   as="a" 
+                  href={ siteBase + "/team/former"} 
+                  active={_path === siteBase + "/team/former"}
+                >
+                  Former Members
+                </Menu.Item>
+                <Menu.Item 
+                  as="a" 
                   href={ siteBase + "/events"} 
                   active={_path === siteBase + "/events"}
                 >
@@ -253,12 +260,56 @@ export class MobileContainer extends React.Component<MobileContainerProps, Mobil
   render() {
     const { children } = this.props;
     const { sidebarOpened } = this.state;
+    const _path = path();
+
+    //<Button as="a" inverted href={ siteBase + "/RoP"} style={{ marginLeft: '0.5em' }}>Rules</Button>
+    //<Button as="a" inverted href={ siteBase + "/team"} style={{ marginLeft: '0.5em' }}>Team</Button>
+    //<Button as="a" inverted href={ siteBase + "/team/former"} style={{ marginLeft: '0.5em' }}>Former Members</Button>
+    //<Button as="a" inverted href={ siteBase + "/events"} style={{ marginLeft: '0.5em' }}>Events</Button>
 
     return (
       <Responsive {...Responsive.onlyMobile}>
         <Sidebar.Pushable>
           <Sidebar as={Menu} animation="uncover" inverted vertical visible={sidebarOpened}>
-            <Menu.Item as="a" active>Home</Menu.Item>
+          <Menu.Item 
+                  as="a" 
+                  href={ siteBase + "/"} 
+                  active={_path === siteBase + "/"}
+                >
+                  Home
+                </Menu.Item>
+                <Popup trigger={
+                  <Menu.Item 
+                    as="a" 
+                    href={ siteBase + "/RoP"} 
+                    active={_path === siteBase + "/RoP"}
+                  >
+                    RoP
+                  </Menu.Item>
+                }>
+                  Rules of Procedure
+                </Popup>
+                <Menu.Item 
+                  as="a" 
+                  href={ siteBase + "/team"} 
+                  active={_path === siteBase + "/team"}
+                >
+                  Team
+                </Menu.Item>
+                <Menu.Item 
+                  as="a" 
+                  href={ siteBase + "/team/former"} 
+                  active={_path === siteBase + "/team/former"}
+                >
+                  Former Members
+                </Menu.Item>
+                <Menu.Item 
+                  as="a" 
+                  href={ siteBase + "/events"} 
+                  active={_path === siteBase + "/events"}
+                >
+                  Events
+                </Menu.Item>
             <Menu.Item as="a">Log in</Menu.Item>
             <Menu.Item as="a">Sign up</Menu.Item>
           </Sidebar>
@@ -273,8 +324,6 @@ export class MobileContainer extends React.Component<MobileContainerProps, Mobil
                   <Menu.Item position="right">
                     <Button as="a" inverted href={ siteBase + "/onboard"} >Log in</Button>
                     <Button as="a" inverted href={ siteBase + "/onboard"} style={{ marginLeft: '0.5em' }}>Sign Up</Button>
-                    <Button as="a" inverted href={ siteBase + "/RoP"} style={{ marginLeft: '0.5em' }}>Rules</Button>
-                    <Button as="a" inverted href={ siteBase + "/team"} style={{ marginLeft: '0.5em' }}>Team</Button>
                   </Menu.Item>
                 </Menu>
               </Container>

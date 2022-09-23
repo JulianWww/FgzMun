@@ -44,13 +44,40 @@ const HomepageHeading = ({ mobile }: HomepageHeadingProps) => (
   </Container>
 );
 
+const HomepageHeadingFormer = ({ mobile }: HomepageHeadingProps) => (
+  <Container text>
+    <Header
+      as="h1"
+      content="Former Members"
+      inverted
+      style={{
+        fontSize: mobile ? '2em' : '4em',
+        fontWeight: 'normal',
+        marginBottom: 0,
+        marginTop: mobile ? '1.5em' : '3em',
+      }}
+    />
+    <Header
+      as="h2"
+      content="Our Former members"
+      inverted
+      style={{
+        fontSize: mobile ? '1.5em' : '1.7em',
+        fontWeight: 'normal',
+        marginTop: mobile ? '0.5em' : '1.5em',
+      }}
+    />
+    <br />
+  </Container>
+);
+
 interface ResponsiveContainerProps {
   children?: React.ReactNode;
 }
 
 function MemberImage(img: string, name: string, func: string) {
     return (
-        <Grid.Column width={4}>
+        <Grid.Column className="thirdwidth">
             <Container className="center aligned">
                 <Image circular src={img} size="large"/>
                 <div>
@@ -69,7 +96,14 @@ const ResponsiveContainer = ({ children }: ResponsiveContainerProps) => (
   </React.Fragment>
 );
 
-export default class Board extends React.Component<{}, { 
+const ResponsiveContainerFormer = ({ children }: ResponsiveContainerProps) => (
+  <React.Fragment>
+    <DesktopContainer children={children} Heading={HomepageHeadingFormer}></DesktopContainer>
+    <MobileContainer children={children} Heading={HomepageHeadingFormer}></MobileContainer>
+  </React.Fragment>
+);
+
+export class Board extends React.Component<{}, { 
   committeeNo?: number,
   delegateNo?: number
 }> {
@@ -87,7 +121,7 @@ export default class Board extends React.Component<{}, {
               <Grid.Column width={16}>
                 <Header className="center aligned"
                     as="h1"
-                    content="Title"
+                    content="Board"
                     style={{
                         fontSize:'4em',
                         fontWeight: 'normal',
@@ -99,39 +133,29 @@ export default class Board extends React.Component<{}, {
               {MemberImage(
                     PublicBase + "/blankPerson.png",
                     "Dylan Christensen",
-                    "President"
+                    "Board Member"
                 )}
               {MemberImage(
                     PublicBase + "/blankPerson.png",
                     "Julia Cope",
-                    "Vice President"
+                    "Board Member"
                 )}
                 {MemberImage(
                     PublicBase + "/blankPerson.png",
                     "Jan-Vincent Makowski",
-                    "Marketing"
-                )}
-                {MemberImage(
-                    PublicBase + "/blankPerson.png",
-                    "Pierre Mathier",
-                    "Marketing"
+                    "Board Member"
                 )}
             </Grid.Row>
             <Grid.Row float>
                 {MemberImage(
                     PublicBase + "/blankPerson.png",
-                    "Julian Wandhoven",
-                    "IT"
+                    "Pierre Mathier",
+                    "Board Member"
                 )}
                 {MemberImage(
                     PublicBase + "/blankPerson.png",
-                    "Christopher Haranov",
-                    "IT"
-                )}
-                {MemberImage(
-                    PublicBase + "/blankPerson.png",
-                    "Marius Ungricht",
-                    "IT"
+                    "Marius Marthe",
+                    "Former Board Member"
                 )}
                 {MemberImage(
                     PublicBase + "/blankPerson.png",
@@ -143,6 +167,59 @@ export default class Board extends React.Component<{}, {
         </Segment>
         {footer}
       </ResponsiveContainer>
+    );
+  }
+}
+
+
+
+export class FormerBoard extends React.Component<{}, { 
+  committeeNo?: number,
+  delegateNo?: number
+}> {
+  constructor(props: {}) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    return (
+      <ResponsiveContainerFormer>
+        <Segment style={{ padding: '3em 0em' }} vertical>
+          <Grid container stackable verticalAlign="middle" flex>
+            <Grid.Row>
+              <Grid.Column width={16}>
+                <Header className="center aligned"
+                    as="h1"
+                    content="Former Members"
+                    style={{
+                        fontSize:'4em',
+                        fontWeight: 'normal',
+                    }}
+                />
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row float>
+              {MemberImage(
+                    PublicBase + "/blankPerson.png",
+                    "Marius Marthe",
+                    "Board Member"
+                )}
+              {MemberImage(
+                    PublicBase + "/blankPerson.png",
+                    "Julian Wandhoven",
+                    "IT Consultant"
+                )}
+                {MemberImage(
+                    PublicBase + "/blankPerson.png",
+                    "",
+                    ""
+                )}
+            </Grid.Row>
+          </Grid>
+        </Segment>
+        {footer}
+      </ResponsiveContainerFormer>
     );
   }
 }

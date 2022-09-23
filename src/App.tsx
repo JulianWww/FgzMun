@@ -21,7 +21,7 @@ import Join from "./components/Join"
 import JoinPolle from "./components/Vote"
 import JoinSelectCountry from "./components/Setuppersonal"
 import Charter from "./components/Charter"
-import Board from "./components/Board"
+import {Board, FormerBoard} from "./components/Board"
 import Events from "./components/Events"
 import { NotFound } from './components/NotFound';
 
@@ -48,6 +48,7 @@ class App extends React.Component {
         <Route exact path={siteBase + "/"} component={Homepage} />
         <Route exact path={siteBase + "/RoP"} component={Charter} />
         <Route exact path={siteBase + "/team"} component={Board}/>
+        <Route exact path={siteBase + "/team/former"} component={FormerBoard}/>
         <Route exact path={siteBase + "/events"} component={Events}/>
         <Route exact path={siteBase + "/onboard"} component={Onboard} />
         <Route exact path={siteBase + "/committees"} component={Onboard} />
