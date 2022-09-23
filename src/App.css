@@ -14,3 +14,7 @@
 .visible {
   display: block !important;
 }
+
+.listindent {
+  padding-left: 100px;
+}
