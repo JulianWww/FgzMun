@@ -384,7 +384,12 @@ export default class Homepage extends React.Component<{}, {
               <Grid.Column width={8}>
                 <Header as="h3" style={{ fontSize: '2em' }}>The Model United Nations Club at FGZ</Header>
                 <p style={{ fontSize: '1.33em' }}>
-                The FGZ Model United Nations Club is the ﬁrst and only student-run extracurricular organization at Freies Gynmasium Zürich and one of only a few Model UN Clubs at the high school level. The Club was founded in 2018 and attended its ﬁrst conference, Paris International Model United Nations (PIMUN), in the same year. At PIMUN, one of Europe’s largest and most prestigious conferences, our delegates were among the youngest and competed with mostly university students. And yet, despite this „David vs. Goliath“ setting, one of our delegates won Best Delegate at his conference and one received an Honorable Mention. The conference was a success. We hope to attend many more conferences and repeat the success of this ﬁrst one.
+                The FGZ Model United Nations Club is a student-run extracurricular organization at Freies Gynmasium Zürich. The Club was 
+                founded in 2018 and has attended multiple conferences including 
+                <a href="https://zumun.ch/"> ZUMUN</a>,  
+                <a href="https://www.imzmun.ch/"> IMZMUN</a>, and 
+                <a href="https://pimun.fr/"> PIMUN</a>. We wish to visit more 
+                conferences in the future.
                 </p>
               </Grid.Column>
               <Grid.Column floated="right" width={8}>
@@ -409,8 +414,15 @@ export default class Homepage extends React.Component<{}, {
             <Grid.Row>
               <Grid.Column>
               <Header as="h3" style={{ fontSize: '2em' }}>Joining</Header>
-                <p style={{ fontSize: '1.33em', color: "red"}}>
-                  Get Marketing to write this text. Thats not my job. JW
+                <p style={{ fontSize: '1.33em'}}>
+                At MUN conferences you practice public speaking, debating, and leadership. You learn about the challenges our world is 
+                currently facing and what we are doing to battle them. By representing another country, you learn about foreign countries, 
+                their problems, and cultures in a way that school does not teach us. You learn to understand the different views of the many 
+                countries in the international community and this brings us a step closer to understanding the world we live in.
+                <br/><br/>
+                The FGZ MUN clubs meets Mondays from 16:05-17:30 in room 207 of the Freies Gymnasium Building. Meetings are held in 
+                english and in accordance with the <a href="">FGZ MUN Rules of Procedure</a>. If you have any questions, would like more 
+                information, or want to join for a tryout-session, please contact the FGZ MUN organizing committee (email: mun@fgz.ch)
                 </p>
               </Grid.Column>
             </Grid.Row>
@@ -418,7 +430,12 @@ export default class Homepage extends React.Component<{}, {
               <Grid.Column>
               <Header as="h3" style={{ fontSize: '2em' }}>Support</Header>
                 <p style={{ fontSize: '1.33em' }}>
-                The FGZ MUN Club was founded to prepare for and attend Model UN conferences in Europe. Its purpose is to incentivize the education of students at FGZ on international issues which are usually left out of the standard curriculum. The preparation for conferences teaches students how to research complex topics, write position papers and how to manage your time effectively. Students study foreign countries in depth and learn to understand their perspective. Model UN conferences teach public speaking, writing, debating and networking. Foremost, however, is the understanding of different viewpoints and the ability to ﬁnd compromise and common goals in complex and often diverging situations. In addition, students practice their English or French in a challenging real-world setting. It gives students an opportunity to broaden their perspectives beyond normal school days and meet new people from different countries and cultures. Students gain a new perspective on international issues and begin to understand their individual position in broader, more global context. Our mission is to offer FGZ students an opportunity to educate themselves, practice valuable skills, meet and engage with people of different cultures to solve complex issues in order to strengthen and broaden the horizon of the entire FGZ student body.
+                Attending Model UN conferences in Switzerland and the EU bears extensive costs, a great obstacle on the journey to fulﬁll 
+                our mission. Being able to cover these costs means to allow the Model United Nations Club at FGZ to be able to offer this 
+                invaluable and unique opportunity. Your engagement as a sponsor greatly helps the Model United Nations Club at FGZ to 
+                ﬁnance conferences and to directly impact the education of our members and FGZ students as a whole.
+                Your support enables young people to engage and participate in ﬁnding solutions of complex international issues and to 
+                develop ever more important skills for our common future.
                 </p>
               </Grid.Column>
             </Grid.Row>
