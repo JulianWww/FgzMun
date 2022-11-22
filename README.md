@@ -60,11 +60,11 @@ The build is minified and the filenames include the hashes.<br>
 
 ## Maintainers
 
-[@MaxwellBo](https://github.com/MaxwellBo).
+[@JulianWww](https://github.com/JulianWww).
 
 ## Contributing
 
-Feel free to dive in! [Open an issue](https://github.com/MaxwellBo/Muncoordinated-2/issues/new) or submit PRs.
+Feel free to dive in! [Open an issue](https://github.com/MunFgz/FgzMun/issues/new) or submit PRs.
 
 You might also want access to some of the SaaS services that we've used to build Muncoordinated:
 
