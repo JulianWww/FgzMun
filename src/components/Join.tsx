@@ -56,7 +56,7 @@ export default class Join extends React.Component<Props, State> {
   }
 
   handleSubmit = () => {
-    window.location.href = siteBase + '/Join/'+this.state.key;
+    this.props.history.push(siteBase + '/Join/'+this.state.key);
   }
 
 

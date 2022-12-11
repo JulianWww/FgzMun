@@ -205,7 +205,7 @@ export default class ResolutionPage extends React.Component<Props & Hooks, State
 
   canAmend = () => {
     const nation = this.getNation();
-    const resolutionFref = this.recoverResolutionFref();
+    //const resolutionFref = this.recoverResolutionFref();
     return (nation !== null && true ) || this.isOwner();
   }
 

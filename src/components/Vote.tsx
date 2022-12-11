@@ -8,6 +8,7 @@ import { URLParameters } from '../types';
 //import { CommitteeTemplate, TEMPLATE_TO_MEMBERS } from '../constants';
 import ConnectionStatus from './ConnectionStatus';
 import { Helmet } from 'react-helmet';
+import { siteBase } from '../data';
 
 interface Props extends RouteComponentProps<URLParameters> {
 }
@@ -63,7 +64,7 @@ export default class JoinPolle extends React.Component<Props, State> {
   handleSubmit = () => {
     const committee = this.state.key.slice(0, 11);
     const poll = this.state.key.slice(12);
-    window.location.href = '/committees/' + committee + "/strawpolls/" + poll;
+    this.props.history.push(siteBase + '/committees/' + committee + "/strawpolls/" + poll);
   }
 
 

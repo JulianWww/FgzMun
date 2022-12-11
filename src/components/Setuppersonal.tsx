@@ -91,9 +91,9 @@ export default class Stats extends React.Component<Props, State> {
 
   async rankRequirements(id: string) {
     const { committee } = this.state;
-    if (committee != undefined) {
+    if (committee !== undefined) {
       const { members } = committee;
-      if ( members != undefined) {
+      if ( members !== undefined) {
         const { rank } = members[id];
         if (rank === Rank.Veto) {
           await this.state.committeeFref.child("members").child(id).child("voting").set(true);
@@ -103,7 +103,7 @@ export default class Stats extends React.Component<Props, State> {
   }
 
   async setDBData(id: string) {
-    const key = this.getKey();
+    //const key = this.getKey();
     setCookie("nation", this.state.countryName);
     //setCookie("authToken", key);
     
@@ -225,7 +225,7 @@ export default class Stats extends React.Component<Props, State> {
               <Message.Header>
                 Redirection
               </Message.Header>
-              If you are not automatically redirected click <a href={siteBase + '/committees/' + this.props.match.params.committeeID}>here</a>
+              If you are not automatically redirected click&nbsp;<button type="button" className="link-button" onClick={() => this.props.history.push(siteBase + '/committees/' + this.props.match.params.committeeID)}>here</button>
             </Message>
             <Form.Button
               style={{ 'marginTop': '20px' }}
