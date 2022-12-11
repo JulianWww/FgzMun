@@ -253,7 +253,7 @@ export default class Onboard extends React.Component<Props, State> {
           </Grid.Row>
           <Grid.Row>
             <Grid.Column>
-              <Login allowNewCommittee={false} />
+              <Login allowNewCommittee={false} history={this.props.history}/>
             </Grid.Column>
             <Grid.Column>
               {this.renderNewCommitteeForm()}

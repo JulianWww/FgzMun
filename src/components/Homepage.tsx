@@ -15,8 +15,31 @@ import {
 } from 'semantic-ui-react';
 import { logClickJoinACommitteeButton, logClickCreateACommitteeButton, logClickLogInButton, logClickSignupButton } from '../analytics';
 import { siteBase } from "../data";
+import  Carousel from  "./utils/carousel";
+import useImagePreloader from '../hooks';
+import { isPropertyAssignment } from 'typescript';
+import { useHistory } from "react-router-dom";
 
-const REPO_LINK = 'https://github.com/JulianWww/Muncoordinated-2';
+const fgzmun1     = "fgzmun1.jpg"
+const fgzmun2     = "/fgzmun2.jpg"
+const IsarMun22_1 = "/isarMun22-1.jpg"
+const IsarMun22_2 = "/isarMun22-2.jpg"
+const IsarMun22_3 = "/isarMun22-3.jpg"
+const IsarMun22_4 = "/isarMun22-4.jpg"
+
+const toPreload = [
+  fgzmun1,
+  fgzmun2,
+  IsarMun22_1,
+  IsarMun22_2,
+  IsarMun22_3
+]
+
+export interface HistoryProps {
+  history: any
+}
+
+const REPO_LINK = 'https://github.com/MunFgz/FgzMun';
 export const footer = (
   <Segment inverted vertical style={{ padding: '5em 0em' }}>
     <Container>
@@ -28,7 +51,7 @@ export const footer = (
               <List.Item as="a" href={REPO_LINK}>Source</List.Item>
               <List.Item
                 as="a"
-                href="https://github.com/JulianWww/Muncoordinated-2/blob/master/LICENSE"
+                href="https://github.com/MunFgz/FgzMun/blob/master/LICENSE"
               >
                 License
               </List.Item>
@@ -38,7 +61,7 @@ export const footer = (
           <Grid.Column width={3}>
             <Header inverted as="h4" content="Services" />
             <List link inverted>
-              <List.Item as="a" href="https://github.com/JulianWww/Muncoordinated-2/issues">Support</List.Item>
+              <List.Item as="a" href="https://github.com/MunFgz/FgzMun/issues">Support</List.Item>
               <List.Item as="a" href="https://www.helpmymun.com/">MUN Resources</List.Item>
               {/* <List.Item as="a">FAQ</List.Item> TODO*/}
             </List>
@@ -73,7 +96,7 @@ interface HomepageHeadingProps {
 /* Heads up! HomepageHeading uses inline styling, however it's not the best practice. Use CSS or styled components for
  * such things.
  */
-const HomepageHeading = ({ mobile }: HomepageHeadingProps) => (
+const HomepageHeading = (history: any) => ({ mobile }: HomepageHeadingProps) => (
   <Container text>
     <Header
       as="h1"
@@ -97,15 +120,15 @@ const HomepageHeading = ({ mobile }: HomepageHeadingProps) => (
       }}
     />
     <br />
-    <Button as="a" primary size="huge" href={ siteBase + "/onboard"} onClick={logClickCreateACommitteeButton}>
+    <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/onboard");logClickCreateACommitteeButton();}}>
       Create a committee
       <Icon name="arrow right" />
     </Button>
-    <Button as="a" primary size="huge" href={ siteBase + "/join"} onClick={logClickJoinACommitteeButton}>
+    <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/join");logClickJoinACommitteeButton()}}>
       Join a committee
       <Icon name="arrow right" />
     </Button><br />
-    <Button as="a" primary size="huge" href={ siteBase + "/StrawPoll"} style={{"marginTop": "5px"}}>
+    <Button as="a" primary size="huge" onClick={() => history.push(siteBase + "/StrawPoll")} style={{"marginTop": "5px"}}>
       Vote on strawpoll
       <Icon name="arrow right" />
     </Button>
@@ -131,8 +154,30 @@ function path() {
  * It can be more complicated, but you can create really flexible markup.
  */
 
-export class DesktopContainer extends React.Component<DesktopContainerProps, DesktopContainerState> {
-  constructor(props: DesktopContainerProps) {
+interface ChildrenProps {
+  children?: React.ReactNode
+}
+
+export function DesktopContainerBuilder(props: ChildrenProps) {
+  const history = useHistory();
+  return <DesktopContainer
+    history={history}
+    Heading={HomepageHeading(history)}
+    {...props}
+  />
+}
+
+export function MobileContainerBuilder(props: ChildrenProps) {
+  const history = useHistory();
+  return <MobileContainer
+    history={history}
+    Heading={HomepageHeading(history)}
+    {...props}
+  />
+}
+
+class DesktopContainer extends React.Component<DesktopContainerProps & HistoryProps, DesktopContainerState> {
+  constructor(props: DesktopContainerProps & HistoryProps) {
     super(props);
 
     this.state = {
@@ -170,15 +215,15 @@ export class DesktopContainer extends React.Component<DesktopContainerProps, Des
               <Container>
                 <Menu.Item 
                   as="a" 
-                  href={ siteBase + "/"} 
-                  active={_path === siteBase + "/"}
+                  active={_path === siteBase + "/" || _path === siteBase}
+                  onClick={() => this.props.history.push(siteBase + "/")}
                 >
                   Home
                 </Menu.Item>
                 <Popup trigger={
                   <Menu.Item 
                     as="a" 
-                    href={ siteBase + "/RoP"} 
+                    onClick={() => this.props.history.push(siteBase + "/RoP")}
                     active={_path === siteBase + "/RoP"}
                   >
                     RoP
@@ -188,30 +233,38 @@ export class DesktopContainer extends React.Component<DesktopContainerProps, Des
                 </Popup>
                 <Menu.Item 
                   as="a" 
-                  href={ siteBase + "/team"} 
+                  onClick={() => this.props.history.push(siteBase + "/team")}
                   active={_path === siteBase + "/team"}
                 >
                   Team
                 </Menu.Item>
                 <Menu.Item 
                   as="a" 
-                  href={ siteBase + "/team/former"} 
+                  onClick={() => this.props.history.push(siteBase + "/team/former")}
                   active={_path === siteBase + "/team/former"}
                 >
                   Former Members
                 </Menu.Item>
                 <Menu.Item 
                   as="a" 
-                  href={ siteBase + "/events"} 
+                  onClick={() => this.props.history.push(siteBase + "/events")}
                   active={_path === siteBase + "/events"}
                 >
                   Events
                 </Menu.Item>
                 <Menu.Item position="right">
-                  <Button as="a" href={ siteBase + "/onboard"} inverted={!fixed} onClick={logClickLogInButton}>
+                  <Button 
+                    as="a" 
+                    inverted={!fixed}
+                    onClick={() => {this.props.history.push(siteBase + "/onboard"); logClickLogInButton()}}>
                     Log in
                   </Button>
-                  <Button as="a" href={ siteBase + "/onboard"} inverted={!fixed} primary={fixed} style={{ marginLeft: '0.5em' }} onClick={logClickSignupButton}>
+                  <Button 
+                    as="a" 
+                    inverted={!fixed} 
+                    primary={fixed} 
+                    style={{ marginLeft: '0.5em' }} 
+                    onClick={() => {this.props.history.push(siteBase + "/onboard"); logClickSignupButton()}}>
                     Sign up
                   </Button>
                 </Menu.Item>
@@ -236,8 +289,8 @@ interface MobileContainerState {
   sidebarOpened: boolean;
 }
 
-export class MobileContainer extends React.Component<MobileContainerProps, MobileContainerState> {
-  constructor(props: MobileContainerProps) {
+export class MobileContainer extends React.Component<MobileContainerProps & HistoryProps, MobileContainerState> {
+  constructor(props: MobileContainerProps & HistoryProps) {
     super(props);
 
     this.state = {
@@ -262,26 +315,21 @@ export class MobileContainer extends React.Component<MobileContainerProps, Mobil
     const { sidebarOpened } = this.state;
     const _path = path();
 
-    //<Button as="a" inverted href={ siteBase + "/RoP"} style={{ marginLeft: '0.5em' }}>Rules</Button>
-    //<Button as="a" inverted href={ siteBase + "/team"} style={{ marginLeft: '0.5em' }}>Team</Button>
-    //<Button as="a" inverted href={ siteBase + "/team/former"} style={{ marginLeft: '0.5em' }}>Former Members</Button>
-    //<Button as="a" inverted href={ siteBase + "/events"} style={{ marginLeft: '0.5em' }}>Events</Button>
-
     return (
       <Responsive {...Responsive.onlyMobile}>
         <Sidebar.Pushable>
           <Sidebar as={Menu} animation="uncover" inverted vertical visible={sidebarOpened}>
           <Menu.Item 
                   as="a" 
-                  href={ siteBase + "/"} 
-                  active={_path === siteBase + "/"}
+                  onClick={() => this.props.history.push(siteBase + "/")}
+                  active={_path === siteBase + "/" || _path === siteBase}
                 >
                   Home
                 </Menu.Item>
                 <Popup trigger={
                   <Menu.Item 
                     as="a" 
-                    href={ siteBase + "/RoP"} 
+                    onClick={() => this.props.history.push(siteBase + "/RoP")}
                     active={_path === siteBase + "/RoP"}
                   >
                     RoP
@@ -291,27 +339,27 @@ export class MobileContainer extends React.Component<MobileContainerProps, Mobil
                 </Popup>
                 <Menu.Item 
                   as="a" 
-                  href={ siteBase + "/team"} 
+                  onClick={() => this.props.history.push(siteBase + "/team")}
                   active={_path === siteBase + "/team"}
                 >
                   Team
                 </Menu.Item>
                 <Menu.Item 
                   as="a" 
-                  href={ siteBase + "/team/former"} 
+                  onClick={() => this.props.history.push(siteBase + "/team/former")}
                   active={_path === siteBase + "/team/former"}
                 >
                   Former Members
                 </Menu.Item>
                 <Menu.Item 
                   as="a" 
-                  href={ siteBase + "/events"} 
+                  onClick={() => this.props.history.push(siteBase + "/events")} 
                   active={_path === siteBase + "/events"}
                 >
                   Events
                 </Menu.Item>
-            <Menu.Item as="a">Log in</Menu.Item>
-            <Menu.Item as="a">Sign up</Menu.Item>
+            <Menu.Item as="a" onClick={() => {this.props.history.push(siteBase + "/onboard"); logClickLogInButton()}}>Log in</Menu.Item>
+            <Menu.Item as="a" onClick={() => {this.props.history.push(siteBase + "/onboard"); logClickSignupButton()}}>Sign up</Menu.Item>
           </Sidebar>
 
           <Sidebar.Pusher dimmed={sidebarOpened} onClick={this.handlePusherClick} style={{ minHeight: '100vh' }}>
@@ -322,8 +370,8 @@ export class MobileContainer extends React.Component<MobileContainerProps, Mobil
                     <Icon name="sidebar" />
                   </Menu.Item>
                   <Menu.Item position="right">
-                    <Button as="a" inverted href={ siteBase + "/onboard"} >Log in</Button>
-                    <Button as="a" inverted href={ siteBase + "/onboard"} style={{ marginLeft: '0.5em' }}>Sign Up</Button>
+                    <Button as="a" inverted onClick={() => {this.props.history.push(siteBase + "/onboard"); logClickLogInButton()}} >Log in</Button>
+                    <Button as="a" inverted onClick={() => {this.props.history.push(siteBase + "/onboard"); logClickSignupButton()}} style={{ marginLeft: '0.5em' }}>Sign Up</Button>
                   </Menu.Item>
                 </Menu>
               </Container>
@@ -342,23 +390,53 @@ interface ResponsiveContainerProps {
   children?: React.ReactNode;
 }
 
-const ResponsiveContainer = ({ children }: ResponsiveContainerProps) => (
+export const ResponsiveContainer = ({ children }: ResponsiveContainerProps) => (
   <React.Fragment>
-    <DesktopContainer children={children} Heading={HomepageHeading}></DesktopContainer>
-    <MobileContainer children={children} Heading={HomepageHeading}></MobileContainer>
+    <DesktopContainerBuilder children={children}></DesktopContainerBuilder>
+    <MobileContainerBuilder children={children}></MobileContainerBuilder>
   </React.Fragment>
 );
 
-export default class Homepage extends React.Component<{}, { 
+interface HomeProps {
+  imagesPreloaded: boolean;
+}
+
+class Homepage extends React.Component<HomeProps & HistoryProps, { 
   committeeNo?: number,
   delegateNo?: number
 }> {
-  constructor(props: {}) {
+  constructor(props: HomeProps & HistoryProps) {
     super(props);
+    
     this.state = {};
   }
 
+  buildRenderElements = (files: String[]) => {
+    var out:{ render: () => JSX.Element; }[] = [];
+    files.forEach((file, idx) => {
+      out.push(
+        {
+          render: () => {
+            return <Image
+              centered
+              bordered
+              rounded
+              fluid
+              size="large"
+              src={file}
+            />
+          }
+        });
+      }
+    );
+    return out;
+  }
+
   render() {
+    const carusell1Elements = this.buildRenderElements(
+      [fgzmun1, fgzmun2, IsarMun22_1, IsarMun22_2, IsarMun22_3]
+    )
+
     return (
       <ResponsiveContainer>
         <Segment style={{ padding: '3em 0em' }} vertical>
@@ -372,7 +450,7 @@ export default class Homepage extends React.Component<{}, {
                 />
               </Grid.Column>
               <Grid.Column width={8}>
-                <Header as="h3" style={{ fontSize: '2em' }}>Model United Nations</Header>
+                <Header as="h3" style={{ fontSize: '2em' }} id="mun">Model United Nations</Header>
                 <p style={{ fontSize: '1.33em' }}>
                 Model United Nations (MUN) is a global extracurricular activity at the high school and university level. It is a simulation of the proceedings of the UN organization. Model UN originated in the United States but spread around the world in the mid 1990s due to efforts by US universities.<br/>
                 Students convene at conferences, organized by universities or large high schools, and represent chosen member-countries of the United Nations. They simulate the activities of a UN body, so-called committees, by discussing important international issues. Beforehand, they research the country they represent, their committee’s topics, and together they try to ﬁnd a sensible solution from the viewpoint of the country they are representing. For a few days, students become delegates of foreign countries and try to work together on complex issues.<br/>
@@ -382,9 +460,9 @@ export default class Homepage extends React.Component<{}, {
             </Grid.Row>
             <Grid.Row>
               <Grid.Column width={8}>
-                <Header as="h3" style={{ fontSize: '2em' }}>The Model United Nations Club at FGZ</Header>
+                <Header as="h3" style={{ fontSize: '2em' }} id="fgzmun">The Model United Nations Club at FGZ</Header>
                 <p style={{ fontSize: '1.33em' }}>
-                The FGZ Model United Nations Club is a student-run extracurricular organization at Freies Gynmasium Zürich. The Club was 
+                The FGZ Model United Nations Club is a student-run extracurricular organization at Freies Gymnasium Zürich. The Club was 
                 founded in 2018 and has attended multiple conferences including 
                 <a href="https://zumun.ch/"> ZUMUN</a>,  
                 <a href="https://www.imzmun.ch/"> IMZMUN</a>, and 
@@ -393,42 +471,49 @@ export default class Homepage extends React.Component<{}, {
                 </p>
               </Grid.Column>
               <Grid.Column floated="right" width={8}>
-                <Image
+                <Carousel
+                elements={carusell1Elements}
+                duration={6000}
+                animation="horizontal flip"
+                showNextPrev={true}
+                showIndicators={true}
+                />
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column width={6}>
+              <Image
                   centered
                   bordered
                   rounded
                   fluid
                   size="large"
-                  src={ "https://fgzmun.ch/wp-content/uploads/2020/01/Unbenannt.png" }
+                  src={IsarMun22_4}
                 />
               </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column>
-                <Header as="h3" style={{ fontSize: '2em' }}>Our Mission</Header>
+              <Grid.Column width={10}>
+                <Header as="h3" style={{ fontSize: '2em' }} id="mission">Our Mission</Header>
                 <p style={{ fontSize: '1.33em' }}>
                 The FGZ MUN Club was founded to prepare for and attend Model UN conferences in Europe. Its purpose is to incentivize the education of students at FGZ on international issues which are usually left out of the standard curriculum. The preparation for conferences teaches students how to research complex topics, write position papers and how to manage your time effectively. Students study foreign countries in depth and learn to understand their perspective. Model UN conferences teach public speaking, writing, debating and networking. Foremost, however, is the understanding of different viewpoints and the ability to ﬁnd compromise and common goals in complex and often diverging situations. In addition, students practice their English or French in a challenging real-world setting. It gives students an opportunity to broaden their perspectives beyond normal school days and meet new people from different countries and cultures. Students gain a new perspective on international issues and begin to understand their individual position in broader, more global context. Our mission is to offer FGZ students an opportunity to educate themselves, practice valuable skills, meet and engage with people of different cultures to solve complex issues in order to strengthen and broaden the horizon of the entire FGZ student body.
                 </p>
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column>
-              <Header as="h3" style={{ fontSize: '2em' }}>Joining</Header>
+                <Header as="h3" style={{ fontSize: '2em' }} id="joining">Joining</Header>
                 <p style={{ fontSize: '1.33em'}}>
                 At MUN conferences you practice public speaking, debating, and leadership. You learn about the challenges our world is 
                 currently facing and what we are doing to battle them. By representing another country, you learn about foreign countries, 
                 their problems, and cultures in a way that school does not teach us. You learn to understand the different views of the many 
                 countries in the international community and this brings us a step closer to understanding the world we live in.
                 <br/><br/>
-                The FGZ MUN clubs meets Mondays from 16:05-17:30 in room 207 of the Freies Gymnasium Building. Meetings are held in 
-                english and in accordance with the <a href="">FGZ MUN Rules of Procedure</a>. If you have any questions, would like more 
-                information, or want to join for a tryout-session, please contact the FGZ MUN organizing committee (email: mun@fgz.ch)
+                The FGZ MUN club meets weekly. See our&nbsp;
+                <button type="button" className="link-button" onClick={() => this.props.history.push(siteBase + "/events")}>events</button> 
+                &nbsp;for more information. Meetings are held in English and in accordance with the&nbsp;
+                <button type="button" className="link-button" onClick={() => this.props.history.push(siteBase + "/RoP")}>FGZ MUN Rules of Procedure</button>. 
+                If you have any questions, would like more information, or want to join for a tryout-session, please contact the FGZ MUN organizing committee (email: mun@fgz.ch)
                 </p>
               </Grid.Column>
             </Grid.Row>
             <Grid.Row>
               <Grid.Column>
-              <Header as="h3" style={{ fontSize: '2em' }}>Support</Header>
+              <Header as="h3" style={{ fontSize: '2em' }} id="support">Support</Header>
                 <p style={{ fontSize: '1.33em' }}>
                 Attending Model UN conferences in Switzerland and the EU bears extensive costs, a great obstacle on the journey to fulﬁll 
                 our mission. Being able to cover these costs means to allow the Model United Nations Club at FGZ to be able to offer this 
@@ -446,3 +531,10 @@ export default class Homepage extends React.Component<{}, {
     );
   }
 };
+
+const RenderHomePage = (props: any) => {
+    const imagesPreloaded = useImagePreloader(toPreload);
+    return <Homepage imagesPreloaded={imagesPreloaded} history={useHistory()} {...isPropertyAssignment} />;
+  };
+
+export default RenderHomePage;

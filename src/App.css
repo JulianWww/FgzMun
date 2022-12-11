@@ -22,3 +22,17 @@
 .listindent {
   padding-left: 100px;
 }
+
+.link-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  color: #4183c4;
+}
+
+.link-button:hover {
+  color: #386ea3;
+} 

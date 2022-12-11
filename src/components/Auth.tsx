@@ -6,6 +6,8 @@ import _ from 'lodash';
 import Loading from './Loading';
 import { logCreateAccount, logLogin } from '../analytics';
 import { siteBase } from "../data";
+import { HistoryProps } from './Homepage';
+import { useHistory } from 'react-router-dom';
 
 enum Mode {
   Login = 'Login',
@@ -31,8 +33,8 @@ interface Props {
   allowNewCommittee?: boolean;
 }
 
-export class Login extends React.Component<Props, State> {
-  constructor(props: Props) {
+export class Login extends React.Component<Props & HistoryProps, State> {
+  constructor(props: Props & HistoryProps) {
     super(props);
 
     this.state = {
@@ -176,7 +178,7 @@ export class Login extends React.Component<Props, State> {
     return (
       <List.Item key={committeeID}>
         <List.Content>
-          <List.Header as="a" href={`${siteBase}/committees/${committeeID}`}>
+          <List.Header as="a" onClick={() => this.props.history.push(siteBase + `${siteBase}/committees/${committeeID}`)}>
             {committee.name}
           </List.Header>
           <List.Description>
@@ -191,7 +193,7 @@ export class Login extends React.Component<Props, State> {
     return (
       <List.Item key={'add'}>
         <List.Content>
-          <List.Header as="a" href={'/onboard'}>
+          <List.Header as="a" onClick={() => this.props.history.push(siteBase + "/onboard")}>
             <Icon name="plus" />Create new committee
           </List.Header>
         </List.Content>
@@ -495,7 +497,7 @@ export class LoginModal extends React.Component<{},
         basic={true} // strip out the outer window
       >
         <Modal.Content>
-          <Login allowNewCommittee={true}/>
+          <Login allowNewCommittee={true} history={useHistory()}/>
         </Modal.Content>
       </Modal>
     );
