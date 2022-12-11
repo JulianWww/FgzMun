@@ -1,6 +1,8 @@
 #!/bin/bash
 
-npm run build
-cp ./.htaccess ./build/.htaccess
-ssh ubuntu@wandhoven.ddns.net "rm -r /media/B/html/mun"
-scp -r build ubuntu@wandhoven.ddns.net:/media/B/html/mun
+yarnpkg build
+zip -r build.zip build
+scp build.zip mun@mun.fgz.ch:~/www.zip
+ssh mun@mun.fgz.ch "rm -r ~/www"
+ssh mun@mun.fgz.ch "unzip www.zip && rm www.zip && mv build www"
+rm build.zip
