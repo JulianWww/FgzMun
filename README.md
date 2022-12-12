@@ -4,7 +4,7 @@
 
 [![Muncoordinated](https://img.shields.io/endpoint?url=https://dashboard.cypress.io/badge/detailed/zxca1q/master&style=flat&logo=cypress)](https://dashboard.cypress.io/projects/zxca1q/runs)
 
-Muncoordinated is a Model UN committee management service, (re)written with TypeScript, React, Semantic UI and Firebase, and available at [muncoordinated.io](https://muncoordinated.io) (Parent Project).
+Muncoordinated is a Model UN committee management service, (re)written with TypeScript, React, Semantic UI and Firebase, and available at [mun.fgz.ch](https://mun.fgz.ch) (Parent Project).
 
 ![demo screenshot](public/promo.png)
 
