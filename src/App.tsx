@@ -22,7 +22,7 @@ import JoinPolle from "./components/Vote"
 import JoinSelectCountry from "./components/Setuppersonal"
 import Charter from "./components/Charter"
 import {Board, FormerBoard} from "./components/Board"
-import Events from "./components/Events"
+import Events from "./components/events/Events"
 import { NotFound } from './components/NotFound';
 
 const firebaseConfig = {

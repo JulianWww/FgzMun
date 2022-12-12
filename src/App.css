@@ -15,6 +15,10 @@
   width: 33% !important
 }
 
+.full-width {
+  width: 100% !important
+}
+
 .visible {
   display: block !important;
 }

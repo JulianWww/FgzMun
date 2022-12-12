@@ -318,7 +318,7 @@ function ResponsiveNav(props: ResponsiveContainerProps) {
   }
 
   const renderMenuItems = () => {
-    const { committee } = props;
+    const { committee, history } = props;
 
     const caucuses = committee ? committee.caucuses : undefined;
     const resolutions = committee ? committee.resolutions : undefined;
@@ -377,7 +377,7 @@ function ResponsiveNav(props: ResponsiveContainerProps) {
           {makeMenuIcon('Help', 'help')}
         </Menu.Menu>
         <Menu.Item key="login">
-          <LoginModal />
+          <LoginModal history={history} />
         </Menu.Item>
       </React.Fragment>
     );
