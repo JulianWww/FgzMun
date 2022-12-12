@@ -1,5 +1,6 @@
 #!/bin/bash
 
+ssh-add /home/denanu/.ssh/id_ed25519-FGZ-MUN
 yarnpkg build
 zip -r build.zip build
 scp build.zip mun@mun.fgz.ch:~/www.zip

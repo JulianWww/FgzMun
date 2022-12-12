@@ -82,8 +82,8 @@ export class Board extends React.Component<{}, {
                 )}
                 {MemberImage(
                     "blankPerson.jpg",
-                    "Marius Marthe",
-                    "Former Board Member"
+                    "Julian Wandhoven",
+                    "IT"
                 )}
                 {MemberImage(
                     "blankPerson.jpg",
@@ -136,19 +136,19 @@ export class FormerBoard extends React.Component<{}, {
             </Grid.Row>
             <Grid.Row float>
               {MemberImage(
-                    "/blankPerson.jpg",
-                    "Marius Marthe",
-                    "Board Member"
+                    "/members/laetitia_planta.jpeg",
+                    "Laetitia von Planta",
+                    ""
                 )}
               {MemberImage(
-                    "/blankPerson.jpg",
-                    "Julian Wandhoven",
-                    "IT Consultant"
+                    "/members/marius_marthe.jpg",
+                    "Marius Marthe",
+                    "Founder"
                 )}
                 {MemberImage(
-                    "/blankPerson.jpg",
-                    "",
-                    ""
+                    "/members/theodor_babusiaux.jpeg",
+                    "Theodor Babusiaux",
+                    "IT"
                 )}
                 
             </Grid.Row>

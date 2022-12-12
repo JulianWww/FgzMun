@@ -210,6 +210,7 @@ class DesktopContainer extends React.Component<DesktopContainerProps & HistoryPr
               inverted={!fixed}
               pointing={!fixed}
               secondary={!fixed}
+              borderless={!fixed}
               size="large"
             >
               <Container>
@@ -469,19 +470,12 @@ class Homepage extends React.Component<HomeProps & HistoryProps, {
                 <a href="https://pimun.fr/"> PIMUN</a>. We wish to visit more 
                 conferences in the future.
                 </p>
+                <Header as="h3" style={{ fontSize: '2em' }} id="mission">Our Mission</Header>
+                <p style={{ fontSize: '1.33em' }}>
+                The FGZ MUN Club was founded to prepare for and attend Model UN conferences in Europe. Its purpose is to incentivize the education of students at FGZ on international issues which are usually left out of the standard curriculum. The preparation for conferences teaches students how to research complex topics, write position papers and how to manage your time effectively. Students study foreign countries in depth and learn to understand their perspective. Model UN conferences teach public speaking, writing, debating and networking. Foremost, however, is the understanding of different viewpoints and the ability to ﬁnd compromise and common goals in complex and often diverging situations. In addition, students practice their English or French in a challenging real-world setting. It gives students an opportunity to broaden their perspectives beyond normal school days and meet new people from different countries and cultures. Students gain a new perspective on international issues and begin to understand their individual position in broader, more global context. Our mission is to offer FGZ students an opportunity to educate themselves, practice valuable skills, meet and engage with people of different cultures to solve complex issues in order to strengthen and broaden the horizon of the entire FGZ student body.
+                </p>
               </Grid.Column>
               <Grid.Column floated="right" width={8}>
-                <Carousel
-                elements={carusell1Elements}
-                duration={6000}
-                animation="horizontal flip"
-                showNextPrev={true}
-                showIndicators={true}
-                />
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column width={6}>
               <Image
                   centered
                   bordered
@@ -491,11 +485,18 @@ class Homepage extends React.Component<HomeProps & HistoryProps, {
                   src={IsarMun22_4}
                 />
               </Grid.Column>
-              <Grid.Column width={10}>
-                <Header as="h3" style={{ fontSize: '2em' }} id="mission">Our Mission</Header>
-                <p style={{ fontSize: '1.33em' }}>
-                The FGZ MUN Club was founded to prepare for and attend Model UN conferences in Europe. Its purpose is to incentivize the education of students at FGZ on international issues which are usually left out of the standard curriculum. The preparation for conferences teaches students how to research complex topics, write position papers and how to manage your time effectively. Students study foreign countries in depth and learn to understand their perspective. Model UN conferences teach public speaking, writing, debating and networking. Foremost, however, is the understanding of different viewpoints and the ability to ﬁnd compromise and common goals in complex and often diverging situations. In addition, students practice their English or French in a challenging real-world setting. It gives students an opportunity to broaden their perspectives beyond normal school days and meet new people from different countries and cultures. Students gain a new perspective on international issues and begin to understand their individual position in broader, more global context. Our mission is to offer FGZ students an opportunity to educate themselves, practice valuable skills, meet and engage with people of different cultures to solve complex issues in order to strengthen and broaden the horizon of the entire FGZ student body.
-                </p>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column width={8}>
+              <Carousel
+                elements={carusell1Elements}
+                duration={6000}
+                animation="horizontal flip"
+                showNextPrev={true}
+                showIndicators={true}
+                />
+              </Grid.Column>
+              <Grid.Column width={8}>
                 <Header as="h3" style={{ fontSize: '2em' }} id="joining">Joining</Header>
                 <p style={{ fontSize: '1.33em'}}>
                 At MUN conferences you practice public speaking, debating, and leadership. You learn about the challenges our world is 
