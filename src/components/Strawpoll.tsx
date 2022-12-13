@@ -358,7 +358,7 @@ export default function Strawpoll(props: StrawpollProps) {
           </Button.Group>
         )
         case StrawpollStage.Voting:
-          return medium === StrawpollMedium.Link 
+          return medium === StrawpollMedium.Link && !user
             && <StrawpollShareHint 
               committeeID={committeeID} 
               strawpollID={strawpollID} 
