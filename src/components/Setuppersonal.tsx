@@ -29,6 +29,7 @@ interface State {
   isVoting: boolean;
   isValid: boolean;
   moveOn: boolean;
+  dbUpdate: boolean;
 }
 
 export default class Stats extends React.Component<Props, State> {
@@ -44,7 +45,8 @@ export default class Stats extends React.Component<Props, State> {
         .child(this.props.match.params.committeeID),
       isVoting: false,
       isValid: true,
-      moveOn: false
+      moveOn: false,
+      dbUpdate: false,
     };
   }
 
@@ -103,6 +105,7 @@ export default class Stats extends React.Component<Props, State> {
   }
 
   async setDBData(id: string) {
+    this.setState({ dbUpdate: true })
     //const key = this.getKey();
     setCookie("nation", this.state.countryName);
     //setCookie("authToken", key);
@@ -117,6 +120,7 @@ export default class Stats extends React.Component<Props, State> {
   submint = () => {
     this.showError("NoSelectionError", true);
     this.showError("RedirectionError", true);
+    this.setState({ dbUpdate: false })
     if (this.state.countryName && this.state.committee)
     {
       const members = this.state.committee.members || {};
@@ -137,13 +141,23 @@ export default class Stats extends React.Component<Props, State> {
       this.showError("NoSelectionError", false);
     }
   };
+
+  updateSharedErros = () => {
+    if (this.state.committee && this.state.committee.members && this.state.countryName) {
+      const member = this.state.committee.members[this.state.countryName];
+      this.showError("frozenError", !member.frozen);
+      if (!this.state.dbUpdate) {
+        this.showError("presentError", !member.present);
+      }
+    }
+  }
+
   setCountry = (event: React.SyntheticEvent<HTMLElement>, data: DropdownProps) => {
     if (this.state.committee && this.state.committee.members && data.value) {
       const value = this.getName(recoverMemberOptions(this.state.committee), (data.value as string));
       const members = this.state.committee.members || {};
       const id = getID(members, value);
       this.setState({ countryName: id });
-      this.showError("frozenError", !this.state.committee.members[id].frozen);
     }
   }
 
@@ -165,14 +179,15 @@ export default class Stats extends React.Component<Props, State> {
   }
 
   renderForm = (committee: CommitteeData) => {
-
     const members = recoverMemberOptions(committee);
+    this.updateSharedErros();
     if (this.state.moveOn) {
       console.log("redirecting");
       return (
         <Redirect to={siteBase + '/committees/' + this.props.match.params.committeeID}  />
       )
     }
+    this.updateSharedErros();
     return (
       <React.Fragment>
         <Segment>
@@ -213,7 +228,10 @@ export default class Stats extends React.Component<Props, State> {
               <Message.Header>
                 Country is frozen
               </Message.Header>
-                Changes to "{this.state.countryName}" are frozen by the chair. If you have to change something contact the chair.
+                Changes to "{
+                  this.state.committee && this.state.countryName && this.state.committee.members &&
+                  this.state.committee.members[this.state.countryName].name
+                }" are frozen by the chair. If you have to change something contact the chair.
             </Message>
             <Message error id="NoSelectionError">
               <Message.Header>

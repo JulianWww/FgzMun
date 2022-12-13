@@ -399,6 +399,7 @@ export default function Strawpoll(props: StrawpollProps) {
             <Button
               basic
               secondary
+              disabled={!user}
               onClick={editOptions}
             >
               <Icon name="arrow left" />
