@@ -101,7 +101,7 @@ export function StrawpollShareHint(props: {
   const url = `${baseUrl()}committees/${committeeID}/strawpolls/${strawpollID}`;
   return (
     <Segment>
-      <Header size='small'>Here's the link to the strawpoll</Header>
+      <Header size='small'>Here's the link to the strawpoll:</Header>
       <Header as="h1" textAlign="center">
         {CopyableText({value: url})} 
       </Header>
