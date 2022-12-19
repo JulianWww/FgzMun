@@ -5,11 +5,9 @@ import {
   Header,
   Segment,
 } from 'semantic-ui-react';
-import { ResponsiveContainer, footer } from "./Homepage"
+import { ResponsiveContainer, footer, HistoryProps } from "./Homepage"
 
-interface HomepageHeadingProps {
-  mobile: boolean;
-}
+import { useHistory } from "react-router-dom";
 
 let charterData = [
   {title: "Participants", data: [
@@ -91,11 +89,11 @@ let charterData = [
   ]}
 ]
 
-export default class Charter extends React.Component<{}, { 
+class Charter extends React.Component<HistoryProps, { 
   committeeNo?: number,
   delegateNo?: number
 }> {
-  constructor(props: {}) {
+  constructor(props: HistoryProps) {
     super(props);
     this.state = {};
   }
@@ -151,8 +149,12 @@ export default class Charter extends React.Component<{}, {
             </Grid.Row>
           </Grid>
         </Segment>
-        {footer}
+        {footer(this.props.history)}
       </ResponsiveContainer>
     );
   }
 }
+
+export default function RenderCharter(props: any) {
+  return <Charter history={useHistory()} {...props} />;
+};

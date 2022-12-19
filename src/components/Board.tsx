@@ -5,11 +5,8 @@ import {
   Header,
   Segment,
 } from 'semantic-ui-react';
-import { ResponsiveContainer, footer } from "./Homepage"
-
-interface HomepageHeadingProps {
-  mobile: boolean;
-}
+import { ResponsiveContainer, footer, HistoryProps } from "./Homepage"
+import { useHistory } from "react-router-dom";
 
 
 /* eslint-disable react/no-multi-comp */
@@ -31,11 +28,11 @@ function MemberImage(img: string, name: string, func: string) {
     );
 }
 
-export class Board extends React.Component<{}, { 
+export class Board extends React.Component<HistoryProps, { 
   committeeNo?: number,
   delegateNo?: number
 }> {
-  constructor(props: {}) {
+  constructor(props: HistoryProps) {
     super(props);
     this.state = {};
   }
@@ -100,7 +97,7 @@ export class Board extends React.Component<{}, {
             </Grid.Row>
           </Grid>
         </Segment>
-        {footer}
+        {footer(this.props.history)}
       </ResponsiveContainer>
     );
   }
@@ -108,11 +105,11 @@ export class Board extends React.Component<{}, {
 
 
 
-export class FormerBoard extends React.Component<{}, { 
+export class FormerBoard extends React.Component<HistoryProps, { 
   committeeNo?: number,
   delegateNo?: number
 }> {
-  constructor(props: {}) {
+  constructor(props: HistoryProps) {
     super(props);
     this.state = {};
   }
@@ -161,8 +158,16 @@ export class FormerBoard extends React.Component<{}, {
             </Grid.Row>
           </Grid>
         </Segment>
-        {footer}
+        {footer(this.props.history)}
       </ResponsiveContainer>
     );
   }
 }
+
+export const RenderBoard= (props: any) => {
+  return <Board history={useHistory()} {...props} />;
+};
+
+export const RenderFormerBoard = (props: any) => {
+  return <FormerBoard history={useHistory()} {...props} />;
+};

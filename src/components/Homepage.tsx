@@ -40,12 +40,12 @@ export interface HistoryProps {
 }
 
 const REPO_LINK = 'https://github.com/MunFgz/FgzMun';
-export const footer = (
+export function footer(history: any) {return (
   <Segment inverted vertical style={{ padding: '5em 0em' }}>
     <Container>
       <Grid divided inverted stackable>
         <Grid.Row>
-          <Grid.Column width={3}>
+          <Grid.Column width={2}>
             <Header inverted as="h4" content="About" />
             <List link inverted>
               <List.Item as="a" href={REPO_LINK}>Source</List.Item>
@@ -58,7 +58,7 @@ export const footer = (
               {/* <List.Item as="a">Contact Us</List.Item> TODO */}
             </List>
           </Grid.Column>
-          <Grid.Column width={3}>
+          <Grid.Column width={2}>
             <Header inverted as="h4" content="Services" />
             <List link inverted>
               <List.Item as="a" href="https://github.com/MunFgz/FgzMun/issues">Support</List.Item>
@@ -66,7 +66,7 @@ export const footer = (
               {/* <List.Item as="a">FAQ</List.Item> TODO*/}
             </List>
           </Grid.Column>
-          <Grid.Column width={6}>
+          <Grid.Column width={5}>
             <Header as="h4" inverted>Info</Header>
             <p>Made with <span role="img" aria-label="love">💖</span> by <a href="https://github.com/MaxwellBo">Max Bo</a>, 
             with assistance from the <a href="https://www.facebook.com/UQUNSA/">UQ United Nations Student Association</a> and 
@@ -82,11 +82,39 @@ export const footer = (
             <div>Admin:</div>
             <p style={{textIndent: "10px"}}>Jwandhoven@gmail.com</p>
           </Grid.Column>
+          <Grid.Column width={4}>
+            <p>
+              <b>
+                Julian Wandhoven
+              </b>
+              <br/>
+              Schlössliweg 5
+              <br />
+              8044 Zürich
+              <br/>
+              Schweiz
+
+              <br/>
+              <br/>
+              <b>
+                E-Mail: 
+              </b> Julian.wandhoven@gmail.com
+              <br/>
+              <b>
+                Telefon:
+              </b> +41762102508
+              <br/>
+              <b>
+                Internet:
+              </b> https://mun.fgz.ch
+              <br/>
+            </p>
+          </Grid.Column>
         </Grid.Row>
       </Grid>
     </Container>
   </Segment>
-)
+)}
 
 interface HomepageHeadingProps {
   mobile: boolean;
@@ -527,15 +555,15 @@ class Homepage extends React.Component<HomeProps & HistoryProps, {
             </Grid.Row>
           </Grid>
         </Segment>
-        {footer}
+        {footer(this.props.history)}
       </ResponsiveContainer>
     );
   }
 };
 
 const RenderHomePage = (props: any) => {
-    const imagesPreloaded = useImagePreloader(toPreload);
-    return <Homepage imagesPreloaded={imagesPreloaded} history={useHistory()} {...isPropertyAssignment} />;
-  };
+  const imagesPreloaded = useImagePreloader(toPreload);
+  return <Homepage imagesPreloaded={imagesPreloaded} history={useHistory()} {...isPropertyAssignment} />;
+};
 
 export default RenderHomePage;

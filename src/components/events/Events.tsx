@@ -11,13 +11,14 @@ import {
   Input,
   InputOnChangeData
 } from 'semantic-ui-react';
-import { ResponsiveContainer, footer } from "../Homepage"
+import { ResponsiveContainer, footer, HistoryProps } from "../Homepage"
 import firebase from 'firebase/app';
 import { AdminUUIDS } from "../../constants"
 import ReactQuill from 'react-quill';
 import * as Quill from "quill";
 import Loading from "../Loading"
 import 'react-quill/dist/quill.snow.css';
+import { useHistory } from "react-router-dom";
 
 interface EventData {
   heading?: string;
@@ -27,7 +28,7 @@ interface EventData {
   location?: string;
 }
 
-export default class Events extends React.Component<{}, { 
+class Events extends React.Component<HistoryProps, { 
   committeeNo?: number,
   delegateNo?: number,
   events?: Record<string, EventData>;
@@ -39,7 +40,7 @@ export default class Events extends React.Component<{}, {
   editingEvent?: string;
   authUnsubscribe?: () => void
 }> {
-  constructor(props: {}) {
+  constructor(props: HistoryProps) {
     super(props);
     this.state = {
         eventsFref: firebase.database().ref("events"),
@@ -345,8 +346,12 @@ export default class Events extends React.Component<{}, {
                 {this.renderNewEditor()}
             </Grid>
         </Segment>
-        {footer}
+        {footer(this.props.history)}
       </ResponsiveContainer>
     );
   }
 }
+
+export default function RenderEvents(props: any) {
+  return <Events history={useHistory()} {...props} />;
+};

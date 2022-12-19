@@ -21,8 +21,9 @@ import Join from "./components/Join"
 import JoinPolle from "./components/Vote"
 import JoinSelectCountry from "./components/Setuppersonal"
 import Charter from "./components/Charter"
-import {Board, FormerBoard} from "./components/Board"
+import {RenderBoard, RenderFormerBoard} from "./components/Board"
 import Events from "./components/events/Events"
+import Dataprotection from "./components/Dataprotection"
 import { NotFound } from './components/NotFound';
 
 const firebaseConfig = {
@@ -47,13 +48,14 @@ class App extends React.Component {
       <Switch>
         <Route preload exact path={siteBase + "/"} component={Homepage} />
         <Route preload exact path={siteBase + "/RoP"} component={Charter} />
-        <Route preload exact path={siteBase + "/team"} component={Board}/>
-        <Route preload exact path={siteBase + "/team/former"} component={FormerBoard}/>
+        <Route preload exact path={siteBase + "/team"} component={RenderBoard}/>
+        <Route preload exact path={siteBase + "/team/former"} component={RenderFormerBoard}/>
         <Route preload exact path={siteBase + "/events"} component={Events}/>
         <Route preload exact path={siteBase + "/onboard"} component={Onboard} />
         <Route preload exact path={siteBase + "/committees"} component={Onboard} />
         <Route preload exact path={siteBase + "/Join"} component={Join} />
         <Route preload exact path={siteBase + "/StrawPoll"} component={JoinPolle}/>
+        <Route preload exact path={siteBase + "/dataprotection"} component={Dataprotection}/>
         <Route preload path={siteBase + "/Join/:committeeID"} component={JoinSelectCountry} />
         <Route preload path={siteBase + "/committees/:committeeID"} component={Committee} />
         <Route preload path="*">
