@@ -7,7 +7,7 @@ function baseUrl () {
   const hostname = window.location.hostname;
   const port = window.location.port;
   const protocol = window.location.protocol;
-  return `${protocol}//${hostname}:${port}/`
+  return `${protocol}//${hostname}${port && ":"}${port}/`
 }
 
 export function CopyableText(props: {
