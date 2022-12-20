@@ -19,6 +19,7 @@ import  Carousel from  "./utils/carousel";
 import useImagePreloader from '../hooks';
 import { isPropertyAssignment } from 'typescript';
 import { useHistory } from "react-router-dom";
+import { DataProtectionAcceptor } from "./Dataprotection"
 
 const fgzmun1     = "fgzmun1.jpg"
 const fgzmun2     = "/fgzmun2.jpg"
@@ -54,6 +55,9 @@ export function footer(history: any) {return (
                 href="https://github.com/MunFgz/FgzMun/blob/master/LICENSE"
               >
                 License
+              </List.Item>
+              <List.Item as="a" onClick={() => history.push(siteBase + "/dataprotection")}>
+                Dataprotection
               </List.Item>
               {/* <List.Item as="a">Contact Us</List.Item> TODO */}
             </List>
@@ -233,6 +237,7 @@ class DesktopContainer extends React.Component<DesktopContainerProps & HistoryPr
       <Responsive {...{ minWidth: Responsive.onlyMobile.maxWidth + 1 }}>
         <Visibility once={false} onBottomPassed={this.showFixedMenu} onBottomPassedReverse={this.hideFixedMenu}>
           <Segment inverted textAlign="center" style={{ minHeight: 700, padding: '1em 0em' }} vertical>
+            {<DataProtectionAcceptor history={this.props.history}/>}
             <Menu
               fixed={fixed ? 'top' : undefined}
               inverted={!fixed}
