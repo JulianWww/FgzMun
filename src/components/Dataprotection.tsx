@@ -41,7 +41,7 @@ class DataProtection extends React.Component<Props, State> {
                   Loggin into an account is handled by Firebase. Passwords are not accessible to anyone. The Emails used to log in are visible to the site Admin. We reserve the right to disable or delete accounts without providing justification.
                 
                 <Header className="center aligned heading" as="h2">Cookies</Header>
-                  The site places tracking cookies for Google Analytics. This information will be forwarded to the appropriate Google Analytics server for processing. All other Cookies are session only and will be deleted upon closing the window.
+                  The site places tracking cookies for Google Analytics. This information will be forwarded to the appropriate Google Analytics server for processing. All other Cookies are session only and will be deleted upon closing the window. Data collected from the Google Analytics and all other cookies will not be used to track the user but rather only to create usage statistics.
                 
                 <Header className="center aligned heading" as="h2">Committee Data</Header>
                 All Data provided in the committee can be read and edied by anyone in the Committee. Any data put into the committee must be appropriate and the site owners will not take responsibility for the contents of committee data inputed by users. Furthermore, we reserve the right to delete or edit committee data if necessary.
