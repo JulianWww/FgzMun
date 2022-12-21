@@ -1,13 +1,10 @@
 import * as React from 'react';
 import { ResponsiveContainer, footer, HistoryProps } from "./Homepage"
 import {
-  Button,
   Container,
   Grid,
   Header
 } from 'semantic-ui-react';
-import {getCookie, setCookie} from "../cookie"
-import { siteBase } from "../data";
 import { useHistory } from "react-router-dom";
 
 interface Props extends HistoryProps {
@@ -26,7 +23,7 @@ class DataProtection extends React.Component<Props, State> {
             <Grid>
               <Grid.Row>
                 <Grid.Column width={16}>
-                  <Header className="center aligned"
+                  <Header className="center aligned heading"
                       as="h1"
                       content="Dataprotection Aggrement"
                       style={{
@@ -45,40 +42,17 @@ class DataProtection extends React.Component<Props, State> {
                 
                 <Header className="center aligned heading" as="h2">Cookies</Header>
                   The site places tracking cookies for Google Analytics. This information will be forwarded to the appropriate Google Analytics server for processing. All other Cookies are session only and will be deleted upon closing the window.
+                
+                <Header className="center aligned heading" as="h2">Committee Data</Header>
+                All Data provided in the committee can be read and edied by anyone in the Committee. Any data put into the committee must be appropriate and the site owners will not take responsibility for the contents of committee data inputed by users. Furthermore, we reserve the right to delete or edit committee data if necessary.
+                  
+                
                 </Grid.Column>
               </Grid.Row>
             </Grid>
         </Container>
         {footer(this.props.history)}
       </ResponsiveContainer>
-    );
-  }
-}
-
-export class DataProtectionAcceptor extends React.Component<HistoryProps, {}> { 
-  render() {
-    const dismissed = getCookie("cookies_dismissed");
-    if (dismissed === "yes") {
-      return null;
-    }
-    return (
-      <Container className='cookieconsent'>
-        <Grid className='cookieconsent'>
-          <Grid.Row>
-            <Grid.Column width={15}>
-              By visiting Our website you consent to the our <button className="link-button" onClick={() => this.props.history.push(siteBase + "/dataprotection")}>dataprotection declatation</button> and the Usage of Cookies to allows us to improve this website.
-            </Grid.Column>
-            <Grid.Column width={1}>
-              <Button primary onClick={
-                () => {
-                  setCookie("cookies_dismissed", "yes");
-                  this.setState({});
-                }
-              }>Accept</Button>
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
-      </Container>
     );
   }
 }

@@ -25,6 +25,8 @@ import {RenderBoard, RenderFormerBoard} from "./components/Board"
 import Events from "./components/events/Events"
 import Dataprotection from "./components/Dataprotection"
 import { NotFound } from './components/NotFound';
+import { Container } from "semantic-ui-react";
+import CookieBanner from 'react-cookie-banner';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBpArYbcA4qxIz2fryKH1ewPkRz35BKcrI",
@@ -45,23 +47,31 @@ firebase.analytics();
 class App extends React.Component {
   render() {
     return (
-      <Switch>
-        <Route preload exact path={siteBase + "/"} component={Homepage} />
-        <Route preload exact path={siteBase + "/RoP"} component={Charter} />
-        <Route preload exact path={siteBase + "/team"} component={RenderBoard}/>
-        <Route preload exact path={siteBase + "/team/former"} component={RenderFormerBoard}/>
-        <Route preload exact path={siteBase + "/events"} component={Events}/>
-        <Route preload exact path={siteBase + "/onboard"} component={Onboard} />
-        <Route preload exact path={siteBase + "/committees"} component={Onboard} />
-        <Route preload exact path={siteBase + "/Join"} component={Join} />
-        <Route preload exact path={siteBase + "/StrawPoll"} component={JoinPolle}/>
-        <Route preload exact path={siteBase + "/dataprotection"} component={Dataprotection}/>
-        <Route preload path={siteBase + "/Join/:committeeID"} component={JoinSelectCountry} />
-        <Route preload path={siteBase + "/committees/:committeeID"} component={Committee} />
-        <Route preload path="*">
-          <NotFound item="page" id="unknown" />
-        </Route>
-      </Switch>
+      <div>
+        <CookieBanner
+          message="by visiting Our website you consent to the our dataprotection declatation and the usage of cookies to allows us to improve this website."
+          onAccept={() => {}}
+          dismissOnScroll={false}
+          cookie="user-has-accepted-cookies"
+        />
+        <Switch>
+          <Route preload exact path={siteBase + "/"} component={Homepage} />
+          <Route preload exact path={siteBase + "/RoP"} component={Charter} />
+          <Route preload exact path={siteBase + "/team"} component={RenderBoard}/>
+          <Route preload exact path={siteBase + "/team/former"} component={RenderFormerBoard}/>
+          <Route preload exact path={siteBase + "/events"} component={Events}/>
+          <Route preload exact path={siteBase + "/onboard"} component={Onboard} />
+          <Route preload exact path={siteBase + "/committees"} component={Onboard} />
+          <Route preload exact path={siteBase + "/Join"} component={Join} />
+          <Route preload exact path={siteBase + "/StrawPoll"} component={JoinPolle}/>
+          <Route preload exact path={siteBase + "/dataprotection"} component={Dataprotection}/>
+          <Route preload path={siteBase + "/Join/:committeeID"} component={JoinSelectCountry} />
+          <Route preload path={siteBase + "/committees/:committeeID"} component={Committee} />
+          <Route preload path="*">
+            <NotFound item="page" id="unknown" />
+          </Route>
+        </Switch>
+      </div>
     );
   }
 }
