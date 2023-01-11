@@ -1,5 +1,10 @@
 import { MemberData, Rank } from "./components/Member";
 
+export const AdminUUIDS = [
+  "Pp9khgyT9RNoa8REiM9GrRkZUUy1",
+  "s473TpAMYgccIyrbDvUlr6TP7Do1"
+]
+
 export const STATE_OPTIONS = [
   { key: 'AL', value: 'AL', text: 'Alabama' },
   { key: 'AK', value: 'AK', text: 'Alaska' },

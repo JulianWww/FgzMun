@@ -7,7 +7,6 @@ import Loading from './Loading';
 import { logCreateAccount, logLogin } from '../analytics';
 import { siteBase } from "../data";
 import { HistoryProps } from './Homepage';
-import { useHistory } from 'react-router-dom';
 
 enum Mode {
   Login = 'Login',
@@ -447,11 +446,11 @@ export class Login extends React.Component<Props & HistoryProps, State> {
   }
 }
 
-export class LoginModal extends React.Component<{}, 
+export class LoginModal extends React.Component<HistoryProps, 
   { user?: firebase.User | null 
     unsubscribe?: () => void
   }> {
-  constructor(props: {}) {
+  constructor(props: HistoryProps) {
     super(props);
     this.state = {
     };
@@ -497,7 +496,7 @@ export class LoginModal extends React.Component<{},
         basic={true} // strip out the outer window
       >
         <Modal.Content>
-          <Login allowNewCommittee={true} history={useHistory()}/>
+          <Login allowNewCommittee={true} history={this.props.history}/>
         </Modal.Content>
       </Modal>
     );

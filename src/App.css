@@ -15,6 +15,10 @@
   width: 33% !important
 }
 
+.full-width {
+  width: 100% !important
+}
+
 .visible {
   display: block !important;
 }
@@ -35,4 +39,13 @@
 
 .link-button:hover {
   color: #386ea3;
-} 
+}
+
+.cookieconsent {
+  margin-top: 1.5em;
+  font-size: 1.2em;
+}
+
+.heading {
+  margin-top: 0.8em !important;
+}

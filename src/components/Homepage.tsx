@@ -20,6 +20,7 @@ import useImagePreloader from '../hooks';
 import { isPropertyAssignment } from 'typescript';
 import { useHistory } from "react-router-dom";
 
+
 const fgzmun1     = "fgzmun1.jpg"
 const fgzmun2     = "/fgzmun2.jpg"
 const IsarMun22_1 = "/isarMun22-1.jpg"
@@ -40,12 +41,12 @@ export interface HistoryProps {
 }
 
 const REPO_LINK = 'https://github.com/MunFgz/FgzMun';
-export const footer = (
+export function footer(history: any) {return (
   <Segment inverted vertical style={{ padding: '5em 0em' }}>
     <Container>
       <Grid divided inverted stackable>
         <Grid.Row>
-          <Grid.Column width={3}>
+          <Grid.Column width={2}>
             <Header inverted as="h4" content="About" />
             <List link inverted>
               <List.Item as="a" href={REPO_LINK}>Source</List.Item>
@@ -55,10 +56,13 @@ export const footer = (
               >
                 License
               </List.Item>
+              <List.Item as="a" onClick={() => history.push(siteBase + "/dataprotection")}>
+                Dataprotection
+              </List.Item>
               {/* <List.Item as="a">Contact Us</List.Item> TODO */}
             </List>
           </Grid.Column>
-          <Grid.Column width={3}>
+          <Grid.Column width={2}>
             <Header inverted as="h4" content="Services" />
             <List link inverted>
               <List.Item as="a" href="https://github.com/MunFgz/FgzMun/issues">Support</List.Item>
@@ -66,7 +70,7 @@ export const footer = (
               {/* <List.Item as="a">FAQ</List.Item> TODO*/}
             </List>
           </Grid.Column>
-          <Grid.Column width={6}>
+          <Grid.Column width={5}>
             <Header as="h4" inverted>Info</Header>
             <p>Made with <span role="img" aria-label="love">💖</span> by <a href="https://github.com/MaxwellBo">Max Bo</a>, 
             with assistance from the <a href="https://www.facebook.com/UQUNSA/">UQ United Nations Student Association</a> and 
@@ -82,11 +86,39 @@ export const footer = (
             <div>Admin:</div>
             <p style={{textIndent: "10px"}}>Jwandhoven@gmail.com</p>
           </Grid.Column>
+          <Grid.Column width={4}>
+            <p>
+              <b>
+                Julian Wandhoven
+              </b>
+              <br/>
+              Schlössliweg 5
+              <br />
+              8044 Zürich
+              <br/>
+              Schweiz
+
+              <br/>
+              <br/>
+              <b>
+                E-Mail: 
+              </b> Julian.wandhoven@gmail.com
+              <br/>
+              <b>
+                Telefon:
+              </b> +41762102508
+              <br/>
+              <b>
+                Internet:
+              </b> https://mun.fgz.ch
+              <br/>
+            </p>
+          </Grid.Column>
         </Grid.Row>
       </Grid>
     </Container>
   </Segment>
-)
+)}
 
 interface HomepageHeadingProps {
   mobile: boolean;
@@ -210,6 +242,7 @@ class DesktopContainer extends React.Component<DesktopContainerProps & HistoryPr
               inverted={!fixed}
               pointing={!fixed}
               secondary={!fixed}
+              borderless={!fixed}
               size="large"
             >
               <Container>
@@ -469,19 +502,12 @@ class Homepage extends React.Component<HomeProps & HistoryProps, {
                 <a href="https://pimun.fr/"> PIMUN</a>. We wish to visit more 
                 conferences in the future.
                 </p>
+                <Header as="h3" style={{ fontSize: '2em' }} id="mission">Our Mission</Header>
+                <p style={{ fontSize: '1.33em' }}>
+                The FGZ MUN Club was founded to prepare for and attend Model UN conferences in Europe. Its purpose is to incentivize the education of students at FGZ on international issues which are usually left out of the standard curriculum. The preparation for conferences teaches students how to research complex topics, write position papers and how to manage your time effectively. Students study foreign countries in depth and learn to understand their perspective. Model UN conferences teach public speaking, writing, debating and networking. Foremost, however, is the understanding of different viewpoints and the ability to ﬁnd compromise and common goals in complex and often diverging situations. In addition, students practice their English or French in a challenging real-world setting. It gives students an opportunity to broaden their perspectives beyond normal school days and meet new people from different countries and cultures. Students gain a new perspective on international issues and begin to understand their individual position in broader, more global context. Our mission is to offer FGZ students an opportunity to educate themselves, practice valuable skills, meet and engage with people of different cultures to solve complex issues in order to strengthen and broaden the horizon of the entire FGZ student body.
+                </p>
               </Grid.Column>
               <Grid.Column floated="right" width={8}>
-                <Carousel
-                elements={carusell1Elements}
-                duration={6000}
-                animation="horizontal flip"
-                showNextPrev={true}
-                showIndicators={true}
-                />
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column width={6}>
               <Image
                   centered
                   bordered
@@ -491,11 +517,18 @@ class Homepage extends React.Component<HomeProps & HistoryProps, {
                   src={IsarMun22_4}
                 />
               </Grid.Column>
-              <Grid.Column width={10}>
-                <Header as="h3" style={{ fontSize: '2em' }} id="mission">Our Mission</Header>
-                <p style={{ fontSize: '1.33em' }}>
-                The FGZ MUN Club was founded to prepare for and attend Model UN conferences in Europe. Its purpose is to incentivize the education of students at FGZ on international issues which are usually left out of the standard curriculum. The preparation for conferences teaches students how to research complex topics, write position papers and how to manage your time effectively. Students study foreign countries in depth and learn to understand their perspective. Model UN conferences teach public speaking, writing, debating and networking. Foremost, however, is the understanding of different viewpoints and the ability to ﬁnd compromise and common goals in complex and often diverging situations. In addition, students practice their English or French in a challenging real-world setting. It gives students an opportunity to broaden their perspectives beyond normal school days and meet new people from different countries and cultures. Students gain a new perspective on international issues and begin to understand their individual position in broader, more global context. Our mission is to offer FGZ students an opportunity to educate themselves, practice valuable skills, meet and engage with people of different cultures to solve complex issues in order to strengthen and broaden the horizon of the entire FGZ student body.
-                </p>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column width={8}>
+              <Carousel
+                elements={carusell1Elements}
+                duration={6000}
+                animation="horizontal flip"
+                showNextPrev={true}
+                showIndicators={true}
+                />
+              </Grid.Column>
+              <Grid.Column width={8}>
                 <Header as="h3" style={{ fontSize: '2em' }} id="joining">Joining</Header>
                 <p style={{ fontSize: '1.33em'}}>
                 At MUN conferences you practice public speaking, debating, and leadership. You learn about the challenges our world is 
@@ -526,15 +559,15 @@ class Homepage extends React.Component<HomeProps & HistoryProps, {
             </Grid.Row>
           </Grid>
         </Segment>
-        {footer}
+        {footer(this.props.history)}
       </ResponsiveContainer>
     );
   }
 };
 
 const RenderHomePage = (props: any) => {
-    const imagesPreloaded = useImagePreloader(toPreload);
-    return <Homepage imagesPreloaded={imagesPreloaded} history={useHistory()} {...isPropertyAssignment} />;
-  };
+  const imagesPreloaded = useImagePreloader(toPreload);
+  return <Homepage imagesPreloaded={imagesPreloaded} history={useHistory()} {...isPropertyAssignment} />;
+};
 
 export default RenderHomePage;

@@ -3,6 +3,13 @@ import { CommitteeID } from './Committee';
 import { Divider, Header, Input, List, Segment } from 'semantic-ui-react';
 import { StrawpollID } from './Strawpoll';
 
+function baseUrl () {
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  const protocol = window.location.protocol;
+  return `${protocol}//${hostname}${port && ":"}${port}/`
+}
+
 export function CopyableText(props: {
   value: string
 }) {
@@ -40,15 +47,14 @@ export function CopyableText(props: {
 export function CommitteeShareHint(props: {
   committeeID: CommitteeID;
 }) {
-  //const hostname = window.location.hostname;
   const { committeeID } = props;
-  const url = `${committeeID}`;//${hostname}/committees/
+  const url = `${baseUrl()}join/${committeeID}`;//
 
   return (
     <Segment>
-      <Header size='medium'>Here's the ID of your committee:</Header>
+      <Header size='medium'>Here's link share it with your delegates for them to join:</Header>
       <Header as="h1" textAlign="center">
-        {url}
+        {CopyableText({value: url})}
       </Header>
 
       <Divider hidden />
@@ -92,12 +98,12 @@ export function StrawpollShareHint(props: {
   strawpollID: StrawpollID;
 }) {
   const { committeeID, strawpollID } = props;
-  const url = `${committeeID}:${strawpollID}`;
+  const url = `${baseUrl()}committees/${committeeID}/strawpolls/${strawpollID}`;
   return (
     <Segment>
-      <Header size='small'>Here's the key to the strawpoll</Header>
+      <Header size='small'>Here's the link to the strawpoll:</Header>
       <Header as="h1" textAlign="center">
-        {url} 
+        {CopyableText({value: url})} 
       </Header>
     </Segment>
   );
