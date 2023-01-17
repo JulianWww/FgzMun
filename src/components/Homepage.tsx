@@ -59,15 +59,13 @@ export function footer(history: any) {return (
               <List.Item as="a" onClick={() => history.push(siteBase + "/dataprotection")}>
                 Dataprotection
               </List.Item>
+              <List.Item
+                as = "a"
+                href="https://github.com/MunFgz/FgzMun/issues"
+              >
+                Issues
+              </List.Item>
               {/* <List.Item as="a">Contact Us</List.Item> TODO */}
-            </List>
-          </Grid.Column>
-          <Grid.Column width={2}>
-            <Header inverted as="h4" content="Services" />
-            <List link inverted>
-              <List.Item as="a" href="https://github.com/MunFgz/FgzMun/issues">Support</List.Item>
-              <List.Item as="a" href="https://www.helpmymun.com/">MUN Resources</List.Item>
-              {/* <List.Item as="a">FAQ</List.Item> TODO*/}
             </List>
           </Grid.Column>
           <Grid.Column width={5}>
@@ -77,6 +75,12 @@ export function footer(history: any) {return (
             modified by <a href="https://github.com/JulianWww">JulianWww</a>
             </p>
             <p>Copyright © 2022</p>
+          </Grid.Column>
+          <Grid.Column width={2} className="centered_text">
+            <Header as="h4" inverted>Social Media</Header>
+            <a href="https://instagram.com/mun_fgz?igshid=YmMyMTA2M2Y=">
+              <img src="https://www.fgz.ch/fileadmin/_processed_/8/8/csm_Instagram_ef31ce2d5f.png"/>
+            </a>
           </Grid.Column>
           <Grid.Column width={3}>
             <Header as="h4" inverted>Contact</Header>
@@ -102,7 +106,7 @@ export function footer(history: any) {return (
               <br/>
               <b>
                 E-Mail: 
-              </b> Julian.wandhoven@gmail.com
+              </b> Jwandhoven@gmail.com
               <br/>
               <b>
                 Telefon:

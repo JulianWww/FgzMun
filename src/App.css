@@ -7,6 +7,10 @@
   text-align: center;
 }
 
+.centered_text {
+  text-align: center;
+}
+
 .tab {
   margin-left: 20px;
 }
@@ -48,4 +52,8 @@
 
 .heading {
   margin-top: 0.8em !important;
+}
+
+.blurededge {
+  box-shadow: 0 0 50px 50px white inset;
 }
