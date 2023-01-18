@@ -12,6 +12,7 @@ import {
   Segment,
   Sidebar,
   Visibility,
+  GridColumn,
 } from 'semantic-ui-react';
 import { logClickJoinACommitteeButton, logClickCreateACommitteeButton, logClickLogInButton, logClickSignupButton } from '../analytics';
 import { siteBase } from "../data";
@@ -129,42 +130,31 @@ interface HomepageHeadingProps {
  * such things.
  */
 const HomepageHeading = (history: any) => ({ mobile }: HomepageHeadingProps) => (
-  <Container text>
-    <Header
-      as="h1"
-      content="FGZ Model United Nations"
-      inverted
-      style={{
-        fontSize: mobile ? '2em' : '4em',
-        fontWeight: 'normal',
-        marginBottom: 0,
-        marginTop: mobile ? '1.5em' : '3em',
-      }}
-    />
-    <Header
-      as="h2"
-      content=""
-      inverted
-      style={{
-        fontSize: mobile ? '1.5em' : '1.7em',
-        fontWeight: 'normal',
-        marginTop: mobile ? '0.5em' : '1.5em',
-      }}
-    />
-    <br />
-    <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/onboard");logClickCreateACommitteeButton();}}>
-      Create a committee
-      <Icon name="arrow right" />
-    </Button>
-    <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/join");logClickJoinACommitteeButton()}}>
-      Join a committee
-      <Icon name="arrow right" />
-    </Button><br />
-    <Button as="a" primary size="huge" onClick={() => history.push(siteBase + "/StrawPoll")} style={{"marginTop": "5px"}}>
-      Vote on strawpoll
-      <Icon name="arrow right" />
-    </Button>
-    <br />
+  <Container text className='heading_content'>
+    <Image src="/members/mun_main.jpg" className="board_image"/>
+
+    <Grid columns={3} className="center noMargin">
+      <Grid.Row className="noMargin headingMenuBar">
+        <Grid.Column>
+          <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/onboard");logClickCreateACommitteeButton();}}>
+            Create a committee
+            <Icon name="arrow right" />
+          </Button>
+        </Grid.Column>
+        <Grid.Column>
+          <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/join");logClickJoinACommitteeButton()}}>
+            Join a committee
+            <Icon name="arrow right" />
+          </Button>
+        </Grid.Column>
+        <Grid.Column>
+          <Button as="a" primary size="huge" onClick={() => history.push(siteBase + "/StrawPoll")}>
+            Vote on strawpoll
+            <Icon name="arrow right" />
+          </Button>
+        </Grid.Column>
+      </Grid.Row>
+    </Grid>
   </Container>
 );
 
