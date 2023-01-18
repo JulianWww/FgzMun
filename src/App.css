@@ -7,6 +7,10 @@
   text-align: center;
 }
 
+.centered_text {
+  text-align: center;
+}
+
 .tab {
   margin-left: 20px;
 }
@@ -75,4 +79,4 @@
 
 .noMargin {
   margin: 0 !important;
-}
+
