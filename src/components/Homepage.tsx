@@ -135,7 +135,7 @@ interface HomepageHeadingProps {
  */
 const HomepageHeading = (history: any) => ({ mobile }: HomepageHeadingProps) => (
   <Container text className='heading_content'>
-    <Image src="/members/mun_main.jpg" className="board_image"/>
+    <Image src="https://fgzmun.ch/wp-content/uploads/2020/01/image001.png" className="board_image"/>
 
     <Grid columns={3} className="center noMargin">
       <Grid.Row className="noMargin headingMenuBar">
@@ -468,19 +468,27 @@ class Homepage extends React.Component<HomeProps & HistoryProps, {
       <ResponsiveContainer>
         <Segment style={{ padding: '3em 0em' }} vertical>
           <Grid container stackable verticalAlign="middle">
-            <Grid.Row>
-              <Grid.Column floated="right" width={8}>
-                <Image
-                  rounded
-                  size="massive"
-                  src={ "https://fgzmun.ch/wp-content/uploads/2020/01/image001.png" }
-                />
-              </Grid.Column>
-              <Grid.Column width={8}>
+            <Grid.Row className="breakline_top_row">
+              <Grid.Column width={16}>
                 <Header as="h3" style={{ fontSize: '2em' }} id="mun">Model United Nations</Header>
                 <p style={{ fontSize: '1.33em' }}>
                 Model United Nations (MUN) is a global extracurricular activity at the high school and university level. It is a simulation of the proceedings of the UN organization. Model UN originated in the United States but spread around the world in the mid 1990s due to efforts by US universities.<br/>
-                Students convene at conferences, organized by universities or large high schools, and represent chosen member-countries of the United Nations. They simulate the activities of a UN body, so-called committees, by discussing important international issues. Beforehand, they research the country they represent, their committee’s topics, and together they try to ﬁnd a sensible solution from the viewpoint of the country they are representing. For a few days, students become delegates of foreign countries and try to work together on complex issues.<br/>
+                Students convene at conferences, organized by universities or large high schools, and represent chosen member-countries of the United Nations. They simulate the activities of a UN body, so-called committees, by discussing important international issues. 
+                </p>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row className='breakline_bottom_row'>
+              <Grid.Column floated="right" width={8} style={{marginTop: "0"}}>
+                <Image
+                  rounded
+                  size="massive"
+                  src={ "/members/mun_main.jpg" }
+                />
+              </Grid.Column>
+              <Grid.Column width={8}>
+                <p style={{ fontSize: '1.33em' }}>
+                Beforehand, they research the country they represent, their committee’s 
+                topics, and together they try to ﬁnd a sensible solution from the viewpoint of the country they are representing. For a few days, students become delegates of foreign countries and try to work together on complex issues.<br/>
                 Model United Nations offers a great opportunity for students of all ages. They study current international issues, learn how to debate according to formal debate rules and try to come up with solutions to complex issues. At conferences, delegates have to give speeches in support of their solution, they argue with each other and learn how to use rhetoric and persuasion to advance their goals. They get to know the different perspectives of different countries and learn how to bargain and compromise. They make friends from different countries and cultures and many of these friendships are kept well past the end of the conference.
                 </p>
               </Grid.Column>

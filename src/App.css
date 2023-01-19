@@ -81,3 +81,10 @@
   margin: 0 !important;
 }
 
+.breakline_top_row {
+  padding-bottom: 0 !important;
+}
+
+.breakline_bottom_row {
+  padding-top: 0 !important;
+}
