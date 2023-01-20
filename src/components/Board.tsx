@@ -8,24 +8,41 @@ import {
 import { ResponsiveContainer, footer, HistoryProps } from "./Homepage"
 import { useHistory } from "react-router-dom";
 import AsyncImage from "./utils/AsyncImage"
+import { JsxElement } from 'typescript';
 
 /* eslint-disable react/no-multi-comp */
 /* Heads up! HomepageHeading uses inline styling, however it's not the best practice. Use CSS or styled components for
  * such things.
  */
 
+function AsyncMemberImage(images: string[], name: string, func: string, tagProvide: (AsyncImage: JSX.Element)=> JSX.Element) {
+  return (
+    <Grid.Column className="thirdwidth">
+      <Container className="center aligned">
+        {tagProvide(<AsyncImage circular images={images} size="large"/>)}
+        <div>
+          {name}<br/>
+          {func}
+        </div>
+      </Container>
+    </Grid.Column>
+  );
+}
+
 function MemberImage(images: string[], name: string, func: string) {
+  const tagProvider = (tag: JSX.Element) => {return tag;};
+  return AsyncMemberImage(images, name, func, tagProvider);
+}
+
+function MemberImage_wURL(images: string[], name: string, func: string, url: string) {
+  const tagProvider = (tag: JSX.Element) => {
     return (
-        <Grid.Column className="thirdwidth">
-          <Container className="center aligned">
-            <AsyncImage circular images={images} size="large"/>
-            <div>
-              {name}<br/>
-              {func}
-            </div>
-          </Container>
-        </Grid.Column>
-    );
+      <a href={url}>
+        {tag}
+      </a>
+      );
+    }
+  return AsyncMemberImage(images, name, func, tagProvider);
 }
 
 export class Board extends React.Component<HistoryProps, { 
@@ -135,12 +152,13 @@ export class FormerBoard extends React.Component<HistoryProps, {
   render() {
     return (
       <ResponsiveContainer>
-        <Segment style={{ padding: '3em 0em' }} vertical>
+        <Segment style={{ padding: '3em 0em' }} vertical inverted>
           <Grid container stackable verticalAlign="middle" flex>
             <Grid.Row>
               <Grid.Column width={16}>
                 <Header className="center aligned"
                     as="h1"
+                    inverted
                     content="Former Members"
                     style={{
                         fontSize:'4em',
@@ -165,22 +183,15 @@ export class FormerBoard extends React.Component<HistoryProps, {
                     "Marius Marthe",
                     "Founder"
                 )}
-                {MemberImage(
+                {MemberImage_wURL(
                     [
-                      "/members/40x60/theodor_babusiaux.jpeg",
-                      "/members/40x60/laetitia_planta.jpeg"
+                      "/members/40x40/theodor.png",
+                      "/members/1000x1000/theodor.png"
                     ],
                     "Theodor Babusiaux",
-                    "IT"
+                    "IT",
+                    "https://www.instagram.com/p/BxJ7vwlFUMS/"
                 )}
-                
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column width={16}>
-                <Container className="center aligned">
-                  Temporary images from: second-renaissance.wikia.com
-                </Container>
-              </Grid.Column>
             </Grid.Row>
           </Grid>
         </Segment>
