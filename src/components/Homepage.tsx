@@ -12,6 +12,7 @@ import {
   Segment,
   Sidebar,
   Visibility,
+  GridColumn,
 } from 'semantic-ui-react';
 import { logClickJoinACommitteeButton, logClickCreateACommitteeButton, logClickLogInButton, logClickSignupButton } from '../analytics';
 import { siteBase } from "../data";
@@ -59,15 +60,13 @@ export function footer(history: any) {return (
               <List.Item as="a" onClick={() => history.push(siteBase + "/dataprotection")}>
                 Dataprotection
               </List.Item>
+              <List.Item
+                as = "a"
+                href="https://github.com/MunFgz/FgzMun/issues"
+              >
+                Issues
+              </List.Item>
               {/* <List.Item as="a">Contact Us</List.Item> TODO */}
-            </List>
-          </Grid.Column>
-          <Grid.Column width={2}>
-            <Header inverted as="h4" content="Services" />
-            <List link inverted>
-              <List.Item as="a" href="https://github.com/MunFgz/FgzMun/issues">Support</List.Item>
-              <List.Item as="a" href="https://www.helpmymun.com/">MUN Resources</List.Item>
-              {/* <List.Item as="a">FAQ</List.Item> TODO*/}
             </List>
           </Grid.Column>
           <Grid.Column width={5}>
@@ -77,6 +76,12 @@ export function footer(history: any) {return (
             modified by <a href="https://github.com/JulianWww">JulianWww</a>
             </p>
             <p>Copyright © 2022</p>
+          </Grid.Column>
+          <Grid.Column width={2} className="centered_text">
+            <Header as="h4" inverted>Social Media</Header>
+            <a href="https://instagram.com/mun_fgz?igshid=YmMyMTA2M2Y=">
+              <img src="https://www.fgz.ch/fileadmin/_processed_/8/8/csm_Instagram_ef31ce2d5f.png"/>
+            </a>
           </Grid.Column>
           <Grid.Column width={3}>
             <Header as="h4" inverted>Contact</Header>
@@ -102,7 +107,7 @@ export function footer(history: any) {return (
               <br/>
               <b>
                 E-Mail: 
-              </b> Julian.wandhoven@gmail.com
+              </b> Jwandhoven@gmail.com
               <br/>
               <b>
                 Telefon:
@@ -129,42 +134,31 @@ interface HomepageHeadingProps {
  * such things.
  */
 const HomepageHeading = (history: any) => ({ mobile }: HomepageHeadingProps) => (
-  <Container text>
-    <Header
-      as="h1"
-      content="FGZ Model United Nations"
-      inverted
-      style={{
-        fontSize: mobile ? '2em' : '4em',
-        fontWeight: 'normal',
-        marginBottom: 0,
-        marginTop: mobile ? '1.5em' : '3em',
-      }}
-    />
-    <Header
-      as="h2"
-      content=""
-      inverted
-      style={{
-        fontSize: mobile ? '1.5em' : '1.7em',
-        fontWeight: 'normal',
-        marginTop: mobile ? '0.5em' : '1.5em',
-      }}
-    />
-    <br />
-    <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/onboard");logClickCreateACommitteeButton();}}>
-      Create a committee
-      <Icon name="arrow right" />
-    </Button>
-    <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/join");logClickJoinACommitteeButton()}}>
-      Join a committee
-      <Icon name="arrow right" />
-    </Button><br />
-    <Button as="a" primary size="huge" onClick={() => history.push(siteBase + "/StrawPoll")} style={{"marginTop": "5px"}}>
-      Vote on strawpoll
-      <Icon name="arrow right" />
-    </Button>
-    <br />
+  <Container text className='heading_content'>
+    <Image src="https://fgzmun.ch/wp-content/uploads/2020/01/image001.png" className="board_image"/>
+
+    <Grid columns={3} className="center noMargin">
+      <Grid.Row className="noMargin headingMenuBar">
+        <Grid.Column>
+          <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/onboard");logClickCreateACommitteeButton();}}>
+            Create a committee
+            <Icon name="arrow right" />
+          </Button>
+        </Grid.Column>
+        <Grid.Column>
+          <Button as="a" primary size="huge" onClick={() => {history.push(siteBase + "/join");logClickJoinACommitteeButton()}}>
+            Join a committee
+            <Icon name="arrow right" />
+          </Button>
+        </Grid.Column>
+        <Grid.Column>
+          <Button as="a" primary size="huge" onClick={() => history.push(siteBase + "/StrawPoll")}>
+            Vote on strawpoll
+            <Icon name="arrow right" />
+          </Button>
+        </Grid.Column>
+      </Grid.Row>
+    </Grid>
   </Container>
 );
 
@@ -474,19 +468,27 @@ class Homepage extends React.Component<HomeProps & HistoryProps, {
       <ResponsiveContainer>
         <Segment style={{ padding: '3em 0em' }} vertical>
           <Grid container stackable verticalAlign="middle">
-            <Grid.Row>
-              <Grid.Column floated="right" width={8}>
-                <Image
-                  rounded
-                  size="massive"
-                  src={ "https://fgzmun.ch/wp-content/uploads/2020/01/image001.png" }
-                />
-              </Grid.Column>
-              <Grid.Column width={8}>
+            <Grid.Row className="breakline_top_row">
+              <Grid.Column width={16}>
                 <Header as="h3" style={{ fontSize: '2em' }} id="mun">Model United Nations</Header>
                 <p style={{ fontSize: '1.33em' }}>
                 Model United Nations (MUN) is a global extracurricular activity at the high school and university level. It is a simulation of the proceedings of the UN organization. Model UN originated in the United States but spread around the world in the mid 1990s due to efforts by US universities.<br/>
-                Students convene at conferences, organized by universities or large high schools, and represent chosen member-countries of the United Nations. They simulate the activities of a UN body, so-called committees, by discussing important international issues. Beforehand, they research the country they represent, their committee’s topics, and together they try to ﬁnd a sensible solution from the viewpoint of the country they are representing. For a few days, students become delegates of foreign countries and try to work together on complex issues.<br/>
+                Students convene at conferences, organized by universities or large high schools, and represent chosen member-countries of the United Nations. They simulate the activities of a UN body, so-called committees, by discussing important international issues. 
+                </p>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row className='breakline_bottom_row'>
+              <Grid.Column floated="right" width={8} style={{marginTop: "0"}}>
+                <Image
+                  rounded
+                  size="massive"
+                  src={ "/members/mun_main.jpg" }
+                />
+              </Grid.Column>
+              <Grid.Column width={8}>
+                <p style={{ fontSize: '1.33em' }}>
+                Beforehand, they research the country they represent, their committee’s 
+                topics, and together they try to ﬁnd a sensible solution from the viewpoint of the country they are representing. For a few days, students become delegates of foreign countries and try to work together on complex issues.<br/>
                 Model United Nations offers a great opportunity for students of all ages. They study current international issues, learn how to debate according to formal debate rules and try to come up with solutions to complex issues. At conferences, delegates have to give speeches in support of their solution, they argue with each other and learn how to use rhetoric and persuasion to advance their goals. They get to know the different perspectives of different countries and learn how to bargain and compromise. They make friends from different countries and cultures and many of these friendships are kept well past the end of the conference.
                 </p>
               </Grid.Column>
